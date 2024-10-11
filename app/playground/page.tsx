@@ -22,7 +22,7 @@ interface State {
 }
 
 export default function Main() {
-  const [language, setLanguage] = useState<LanguageCode>("id-ID");
+  const [language, setLanguage] = useState<LanguageCode>("en-US");
   const onChangeLanguage = (language: LanguageCode) => setLanguage(language);
   const [{ run, steps }, setState] = useState<State>({
     run: false,
@@ -30,7 +30,8 @@ export default function Main() {
       {
         content: (
           <span className="text-sm">
-            Please don&apos;t forget to turn on your microphone and use earphones/headsets for a smoother interaction with BEEXPERT.
+            Please don&apos;t forget to turn on your microphone and use
+            earphones/headsets for a smoother interaction with BEEXPERT.
           </span>
         ),
         locale: { skip: <strong aria-label="skip">Skip</strong> },
@@ -45,7 +46,8 @@ export default function Main() {
       {
         content: (
           <span className="text-sm">
-            You can switch the communication language with BEEXPERT to English by pressing the following button.
+            You can switch the communication language with BEEXPERT to English
+            by pressing the following button.
           </span>
         ),
         placement: "bottom",
@@ -68,7 +70,11 @@ export default function Main() {
         title: <h2 className="font-bold">Demo Video</h2>,
       },
       {
-        content: <span className="text-sm">Position the canvas just the way you like it!</span>,
+        content: (
+          <span className="text-sm">
+            Position the canvas just the way you like it!
+          </span>
+        ),
         placement: "right",
         styles: {
           options: {
@@ -140,9 +146,7 @@ export default function Main() {
       },
       {
         content: (
-          <span className="text-sm">
-            Revert your drawing one step back.
-          </span>
+          <span className="text-sm">Revert your drawing one step back.</span>
         ),
         placement: "right",
         styles: {
@@ -155,9 +159,7 @@ export default function Main() {
       },
       {
         content: (
-          <span className="text-sm">
-            Revert your drawing one step after.
-          </span>
+          <span className="text-sm">Revert your drawing one step after.</span>
         ),
         placement: "right",
         styles: {
