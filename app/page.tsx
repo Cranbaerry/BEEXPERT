@@ -50,7 +50,7 @@ async function AuthenticationPage({
                 href="https://www.linkedin.com/in/nathaniel-candra-b21288206/"
                 target="_blank"
               >
-                Nathaniel Chandra
+                Nathaniel Candra
               </a>
               .
             </footer>

@@ -11,7 +11,8 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "BEEXPERT",
   description:
-    "Platform bimbingan belajar berbasis AI yang dirancang untuk siswa SMA yang memungkinkan siswa untuk memasukkan pertanyaan melalui suara dan gambar secara langsung.",
+    // "Platform bimbingan belajar berbasis AI yang dirancang untuk siswa SMA yang memungkinkan siswa untuk memasukkan pertanyaan melalui suara dan gambar secara langsung.",
+    "An AI-based tutoring platform designed for high school students that allows them to ask questions directly through voice and images.",
 };
 
 export default function RootLayout({
