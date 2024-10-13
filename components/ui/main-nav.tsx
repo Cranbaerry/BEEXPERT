@@ -83,16 +83,18 @@ export function MainNav({
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              Bahasa komunikasi berhasil diubah!
+              {isLanguageEN
+                ? "The communication language has been successfully changed!"
+                : "Bahasa komunikasi berhasil diubah!"}
             </AlertDialogTitle>
             <AlertDialogDescription>
-              Sekarang, kamu bisa berinteraksi dengan BEEXPERT menggunakan
-              bahasa {isLanguageEN ? "Inggris" : "Indonesia"}.
+              Now, you can interact with BEEXPERT using{" "}
+              {isLanguageEN ? "English" : "Indonesian"}.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogAction onClick={() => setIsAlertChangeLangOpen(false)}>
-              Mengerti
+              Understood
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

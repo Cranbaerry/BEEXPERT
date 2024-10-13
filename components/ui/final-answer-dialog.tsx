@@ -33,13 +33,13 @@ import { CanvasRef } from "@/lib/definitions";
 
 export const formSchema = z.object({
   question1: z.string({
-    required_error: "Kolom jawaban nomor 1 wajib diisi.",
+    required_error: "Question number 1 must be filled.",
   }),
   question2: z.string({
-    required_error: "Kolom jawaban nomor 2 wajib diisi.",
+    required_error: "Question number 2 must be filled.",
   }),
   question3: z.string({
-    required_error: "Kolom jawaban nomor 3 wajib diisi.",
+    required_error: "Question number 3 must be filled.",
   }),
 });
 
@@ -62,7 +62,7 @@ function DialogFinalAnswer({ canvasRef }: IDialogFinalAnswerProps) {
 
   const onError = () => {
     toast.error("Error", {
-      description: "Silahkan mengisi semua kolom yang diberikan.",
+      description: "Please fill in all the provided fields.",
     });
   };
 
@@ -86,7 +86,9 @@ function DialogFinalAnswer({ canvasRef }: IDialogFinalAnswerProps) {
       return;
     }
     insert({ ...values, imageUrl: imageUrl });
-    toast.success("Success", { description: "Data has been saved successfully." });
+    toast.success("Success", {
+      description: "Data has been saved successfully.",
+    });
     router.push("/evaluation");
     setLoading(false);
   }
@@ -94,16 +96,18 @@ function DialogFinalAnswer({ canvasRef }: IDialogFinalAnswerProps) {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="default">Selesai</Button>
+        <Button variant="default">Finish</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit, onError)}>
             <DialogHeader>
-              <DialogTitle>Kumpul Jawaban Akhir</DialogTitle>
+              <DialogTitle>Submit Final Answer</DialogTitle>
               <DialogDescription>
-                Masukkan jawaban akhir yang kamu dapatkan setelah mengerjakan
-                soal-soal bersama BEEXPERT.
+                {/* Masukkan jawaban akhir yang kamu dapatkan setelah mengerjakan
+                soal-soal bersama BEEXPERT. */}
+                Enter the final answers you obtained after working on the
+                problem with BEEXPERT
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
@@ -112,9 +116,9 @@ function DialogFinalAnswer({ canvasRef }: IDialogFinalAnswerProps) {
                 name="question1"
                 render={({ field }) => (
                   <FormItem className="grid grid-cols-4 items-center gap-4">
-                    <FormLabel className="text-right">Soal 1</FormLabel>
+                    <FormLabel className="text-right">Question 1</FormLabel>
                     <FormControl className="col-span-3">
-                      <Input placeholder="Jawaban 1" {...field} required />
+                      <Input placeholder="Answer 1" {...field} required />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -125,9 +129,9 @@ function DialogFinalAnswer({ canvasRef }: IDialogFinalAnswerProps) {
                 name="question2"
                 render={({ field }) => (
                   <FormItem className="grid grid-cols-4 items-center gap-4">
-                    <FormLabel className="text-right">Soal 2</FormLabel>
+                    <FormLabel className="text-right">Question 2</FormLabel>
                     <FormControl className="col-span-3">
-                      <Input placeholder="Jawaban 2" {...field} required />
+                      <Input placeholder="Answer 2" {...field} required />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -138,9 +142,9 @@ function DialogFinalAnswer({ canvasRef }: IDialogFinalAnswerProps) {
                 name="question3"
                 render={({ field }) => (
                   <FormItem className="grid grid-cols-4 items-center gap-4">
-                    <FormLabel className="text-right">Soal 3</FormLabel>
+                    <FormLabel className="text-right">Question 3</FormLabel>
                     <FormControl className="col-span-3">
-                      <Input placeholder="Jawaban 3" {...field} required />
+                      <Input placeholder="Answer 3" {...field} required />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

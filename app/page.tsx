@@ -29,12 +29,13 @@ async function AuthenticationPage({
         <div className="relative z-20 mt-auto">
           <blockquote className="space-y-2">
             <p className="text-base">
-            An AI-based tutoring platform designed for high school students that allows them to ask questions directly through voice and images.
+              An AI-based tutoring platform designed for high school students
+              that allows them to ask questions directly through voice and
+              images.
             </p>
             <footer className="text-xs italic">
-              Part of &ldquo;Chatbot System with Retrieval
-              Augmented Generation for Enhanced Self-learning Experience&rdquo;
-              research by{" "}
+              Part of &ldquo;Chatbot System with Retrieval Augmented Generation
+              for Enhanced Self-learning Experience&rdquo; research by{" "}
               <a
                 href="https://www.linkedin.com/in/angeline-mary-marchella/"
                 target="_blank"
@@ -50,7 +51,7 @@ async function AuthenticationPage({
                 href="https://www.linkedin.com/in/nathaniel-candra-b21288206/"
                 target="_blank"
               >
-                Nathaniel Chandra
+                Nathaniel Candra
               </a>
               .
             </footer>

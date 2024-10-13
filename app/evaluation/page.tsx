@@ -49,7 +49,7 @@ export default function PetunjukPengunaan() {
             id="evaluasi"
             className="rounded-md border-0 p-4 bg-[rgb(255,255,255)]"
           >
-            <h1 className="font-bold text-3xl mb-2">Evaluasi</h1>
+            <h1 className="font-bold text-3xl mb-2">Evaluation</h1>
             <Form {...form}>
               <form
                 onSubmit={form.handleSubmit(onSubmit)}
