@@ -31,7 +31,7 @@ export function MainNav({
   onChangeLanguage,
   ...props
 }: IMainNavProps) {
-  const [isLanguageEN, setIsLanguageEN] = useState(false);
+  const [isLanguageEN, setIsLanguageEN] = useState(true);
   const [isAlertChangeLangOpen, setIsAlertChangeLangOpen] = useState(false);
 
   useEffect(() => {
