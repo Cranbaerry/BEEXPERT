@@ -238,15 +238,18 @@ export default function Playground({ language }: IPlaygroundProps) {
       }
 
       const messages: Message[] = dbMessages
-      .filter((dbMessage: DbMessage) => Array.isArray(dbMessage.types) && dbMessage.types.includes("text"))
-      .map((dbMessage: DbMessage) => {
-        return {
-          id: dbMessage.id,
-          role: dbMessage.role,
-          content: dbMessage.content,
-          createdAt: dbMessage.created_at,
-        };
-      });
+        .filter(
+          (dbMessage: DbMessage) =>
+            Array.isArray(dbMessage.types) && dbMessage.types.includes("text"),
+        )
+        .map((dbMessage: DbMessage) => {
+          return {
+            id: dbMessage.id,
+            role: dbMessage.role,
+            content: dbMessage.content,
+            createdAt: dbMessage.created_at,
+          };
+        });
       setMessages(messages);
       setIsMessagesLoaded(true);
     };

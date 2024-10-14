@@ -86,7 +86,9 @@ function DialogFinalAnswer({ canvasRef }: IDialogFinalAnswerProps) {
       return;
     }
     insert({ ...values, imageUrl: imageUrl });
-    toast.success("Success", { description: "Data has been saved successfully." });
+    toast.success("Success", {
+      description: "Data has been saved successfully.",
+    });
     router.push("/evaluation");
     setLoading(false);
   }

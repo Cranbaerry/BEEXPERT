@@ -71,7 +71,9 @@ export default function PreTest() {
       imageUrl: imageUrl,
     };
     insert(values);
-    toast.success("Success", { description: "Data has been saved successfully." });
+    toast.success("Success", {
+      description: "Data has been saved successfully.",
+    });
     setSubmitted(true);
     setLoading(false);
   };
@@ -112,8 +114,9 @@ export default function PreTest() {
                 <legend className="text-lg mb-2">
                   {/* Jawablah pertanyaan berikut dengan jujur tanpa bantuan apapun.
                   Tenang, jawaban kalian tidak akan masuk ke nilai rapot kok :D */}
-                  Please answer the following question without any tools or assistance.
-                  Don&apos;t worry, your answer won&apos;t affect your grades :D
+                  Please answer the following question without any tools or
+                  assistance. Don&apos;t worry, your answer won&apos;t affect
+                  your grades :D
                 </legend>
                 <div className="flex items-center justify-center mt-2 mb-2">
                   <Image
@@ -153,8 +156,8 @@ export default function PreTest() {
                     <p className="text-green-600" role="alert">
                       {/* Selamat, jawabanmu benar! Yuk, belajar lebih dalam lagi
                       dengan BEEXPERT di halaman selanjutnya! */}
-                      Congratulation, you answer is correct! Let&apos;s try learning
-                      using BEEXPERT in the next page!
+                      Congratulation, you answer is correct! Let&apos;s try
+                      learning using BEEXPERT in the next page!
                     </p>
                   ) : (
                     <p className="text-red-600" role="alert">
@@ -162,8 +165,8 @@ export default function PreTest() {
                       {correctAnswer}. Yuk, mulai belajar dengan BEEXPERT di
                       halaman selanjutnya! */}
                       Good try, but your answer is incorrect. The correct answer
-                      should be{" "}{correctAnswer}. Let&apos;s try learning
-                      using BEEXPERT in the next page!
+                      should be {correctAnswer}. Let&apos;s try learning using
+                      BEEXPERT in the next page!
                     </p>
                   )}
                 </div>

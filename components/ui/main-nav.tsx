@@ -31,7 +31,7 @@ export function MainNav({
   onChangeLanguage,
   ...props
 }: IMainNavProps) {
-  const [isLanguageEN, setIsLanguageEN] = useState(false);
+  const [isLanguageEN, setIsLanguageEN] = useState(true);
   const [isAlertChangeLangOpen, setIsAlertChangeLangOpen] = useState(false);
 
   useEffect(() => {
@@ -83,11 +83,13 @@ export function MainNav({
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {isLanguageEN ? "The communication language has been successfully changed!"
+              {isLanguageEN
+                ? "The communication language has been successfully changed!"
                 : "Bahasa komunikasi berhasil diubah!"}
             </AlertDialogTitle>
             <AlertDialogDescription>
-            Now, you can interact with BEEXPERT using {isLanguageEN ? "English" : "Indonesian"}.
+              Now, you can interact with BEEXPERT using{" "}
+              {isLanguageEN ? "English" : "Indonesian"}.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
