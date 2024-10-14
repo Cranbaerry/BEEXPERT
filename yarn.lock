@@ -201,9 +201,9 @@
     "@huggingface/tasks" "^0.12.9"
 
 "@huggingface/tasks@^0.12.9":
-  version "0.12.15"
-  resolved "https://registry.npmjs.org/@huggingface/tasks/-/tasks-0.12.15.tgz"
-  integrity sha512-Q157AdiUon+WEYqan4Gd9QfMfBSRV9Cf7RrmiCo8kGpAUybfs6hk4TY8MGeZT+DdtVSBY4JsYz9ttpNk0KlaZQ==
+  version "0.12.21"
+  resolved "https://registry.npmjs.org/@huggingface/tasks/-/tasks-0.12.21.tgz"
+  integrity sha512-Sq2ZWhamRTwmkDuCle4STIZbeEnbdyC1bRE+6wM6UgYhfK7NG1WFbjQjftObQIfxKHv//+Q+x3iBFb3P9vmDjA==
 
 "@humanwhocodes/config-array@^0.13.0":
   version "0.13.0"
@@ -1572,7 +1572,7 @@ agentkeepalive@^4.2.1:
   dependencies:
     humanize-ms "^1.2.1"
 
-ai@^3.3.37:
+ai@^3.4.9:
   version "3.4.9"
   resolved "https://registry.npmjs.org/ai/-/ai-3.4.9.tgz"
   integrity sha512-wmVzpIHNGjCEjIJ/3945a/DIkz+gwObjC767ZRgO8AmtIZMO5KqvqNr7n2KF+gQrCPCMC8fM1ICQFXSvBZnBlA==
