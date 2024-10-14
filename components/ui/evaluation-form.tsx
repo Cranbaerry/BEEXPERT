@@ -24,6 +24,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ChevronLeftIcon, ChevronRightIcon } from "@radix-ui/react-icons";
 import { Icons } from "@/components/ui/icons";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { insertEvaluationData } from "@/lib/utils";
 
 const commonValidationSchema = z.array(
   z.enum(["1", "2", "3", "4", "5"], {
@@ -310,16 +311,19 @@ export default function EvaluationForm() {
   });
 
   const handleSubmit = async (data: z.infer<typeof surveySchema>) => {
-    console.log(data);
+    console.log(data)
     setIsLoading(true);
-    try {
-      toast.success("Survey submitted successfully!");
-      setIsOpen(false);
-    } catch (error) {
-      toast.error("Failed to submit survey.");
-    } finally {
+    const { error } = await insertEvaluationData(data);
+
+    if (error) {
+      toast.error(error);
       setIsLoading(false);
+      return;
     }
+
+    toast.info("Thank you for completing the survey. Your feedback has been saved.");
+    setIsOpen(false);
+    setIsLoading(false);
   };
 
   const handleError = (formErrors: FieldErrors) => {

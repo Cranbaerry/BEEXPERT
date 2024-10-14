@@ -89,8 +89,8 @@ export async function isQuestionnaireFinished() {
 type questionnaireFormData = z.infer<typeof formSchema>;
 export async function insertQuestionnaireData(values: questionnaireFormData) {
   const supabase = createClient();
-  const user = await getUserData(supabase);
-  if (!user) return { error: "User is not logged in" };
+  const user = await getUserData(supabase, false);
+  if (!user) return { data: null, error: "User is not logged in" };
 
   const { error } = await supabase.from("profiles").insert({
     full_name: values.fullName,
@@ -100,7 +100,7 @@ export async function insertQuestionnaireData(values: questionnaireFormData) {
     education_level: values.educationLevel,
     school: values.school,
   });
-  if (error) return { error: error.message };
+  if (error) return { data: null, error: error.message };
 
   const insertPromises = Object.entries(values).map(async ([key, value]) => {
     const answerObject = {
@@ -119,19 +119,40 @@ export async function insertQuestionnaireData(values: questionnaireFormData) {
     await Promise.all(insertPromises);
   } catch (error: unknown) {
     const err = error as PostgrestError;
-    return { error: err.message };
+    return { data:null, error: err.message };
   }
 
-  return { data: { userId: user.id } };
+  return { data: { userId: user.id }, error:null };
 }
 
 type evaluationFormData = z.infer<typeof surveySchema>;
 export async function insertEvaluationData(values: evaluationFormData) {
   const supabase = createClient();
-  const user = await getUserData(supabase);
+  const user = await getUserData(supabase, false);
   if (!user) return { error: "User is not logged in" };
 
+  const insertPromises = Object.entries(values).map(async ([key, value]) => {
+    const answerObject = {
+      type: typeof value,
+      value: value,
+    };
 
+    const { error } = await supabase.from("evaluations").insert({
+      evaluation_id: key,
+      answer: answerObject,
+    });
+    
+    if (error) throw error;
+  });
+
+  try {
+    await Promise.all(insertPromises);
+  } catch (error: unknown) {
+    const err = error as PostgrestError;
+    return { data: null, error: err.message };
+  }
+
+  return { data: { userId: user.id }, error: null };
 };
 
 export async function isNewUser() {
