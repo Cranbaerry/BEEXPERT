@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
 import { Header } from "@/components/ui/header";
+import EvaluationForm from "@/components/ui/evaluation-form";
 
 const FormSchema = z.object({
   eval1: z.string().min(10, {
@@ -42,6 +43,7 @@ export default function PetunjukPengunaan() {
 
   return (
     <>
+    <EvaluationForm/>
       <Header isFixed enableChangeLanguage={false} />
       <main className="flex min-h-screen flex-row items-start justify-center p-20 bg-[rgb(245,245,245)]">
         <div className="h-full w-3/4">
