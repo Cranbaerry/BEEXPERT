@@ -45,6 +45,7 @@ export const surveySchema = z.object({
   perceivedSpeed: commonValidationSchema,
   perceivedPrivacy: commonValidationSchema,
   selfEfficacy: commonValidationSchema,
+  criticsmAndSuggestions: z.array(z.string().nonempty()),
 });
 
 const sections = [
@@ -276,6 +277,16 @@ const sections = [
       },
     ],
   },
+  {
+    title: "Criticsm and Suggestions",
+    key: "criticsmAndSuggestions",
+    statements: [
+      {
+        statement: "Any other suggestions or criticisms for the chatbot?",
+        translation: "Ada saran lain atau kritik untuk chatbot?",
+      },
+    ],
+  }
 ];
 
 export default function EvaluationForm() {
@@ -288,16 +299,18 @@ export default function EvaluationForm() {
     defaultValues: {
       initiatingConversation: Array(sections[0].statements.length).fill(""),
       communicationEffort: Array(sections[1].statements.length).fill(""),
-      contentRelevance: [],
-      responseClarity: [],
-      gracefulBreakdown: [],
-      perceivedSpeed: [],
-      perceivedPrivacy: [],
-      selfEfficacy: [],
+      contentRelevance: Array(sections[2].statements.length).fill(""),
+      responseClarity: Array(sections[3].statements.length).fill(""),
+      gracefulBreakdown: Array(sections[4].statements.length).fill(""),
+      perceivedSpeed: Array(sections[5].statements.length).fill(""),
+      perceivedPrivacy: Array(sections[6].statements.length).fill(""),
+      selfEfficacy: Array(sections[7].statements.length).fill(""),
+      criticsmAndSuggestions: Array(sections[8].statements.length).fill(""),
     },
   });
 
   const handleSubmit = async (data: z.infer<typeof surveySchema>) => {
+    console.log(data);
     setIsLoading(true);
     try {
       toast.success("Survey submitted successfully!");
@@ -312,9 +325,13 @@ export default function EvaluationForm() {
   const handleError = (formErrors: FieldErrors) => {
     const currentSectionKey = sections[activeSection].key;
     if (!formErrors[currentSectionKey]) {
-      setActiveSection(activeSection + 1);
+      //setActiveSection(activeSection + 1);
+      setActiveSection((prev) => Math.min(prev + 1, sections.length - 1));
       form.clearErrors();
+      return;
     }
+
+    toast.error("Please fill in all required fields.");
   };
 
   const handleOpenChange = (open: boolean) => {
@@ -333,83 +350,112 @@ export default function EvaluationForm() {
     <AlertDialog open={isOpen} onOpenChange={handleOpenChange}>
       <AlertDialogContent className="sm:max-w-[600px]">
         <AlertDialogHeader>
-          <h2 className="text-lg font-bold">Evaluation - {currentSection.title}</h2>
+          <h2 className="text-xl font-bold">User Feedback</h2>
+          Thank you for trying out our app! We would like to hear your feedback on your experience with the platform. 😇❤️
         </AlertDialogHeader>
-        <ScrollArea className="!mb-2 h-[calc(100vh-10rem)] sm:h-96 px-1">
-          <FormProvider {...form}>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(handleSubmit, handleError)}>
-                {currentSection.statements.map((item, index) => (
-                  <FormField
-                    key={index}
-                    control={form.control}
-                    name={`${currentSection.key}.${index}` as keyof z.infer<typeof surveySchema>}
-                    render={({ field }) => (
-                      <FormItem className="mb-4">
-                        <FormLabel>
-                          {index + 1}. {item.statement}
-                        </FormLabel>
-                        <p className="text-sm text-gray-500">{item.translation}</p>
-                        <FormControl>
-                          <RadioGroup
-                            onValueChange={field.onChange}
-                            value={typeof field.value === "string" ? field.value : ""}
-                            className="flex flex-row space-x-4 mt-2"
-                          >
-                            {["1", "2", "3", "4", "5"].map((value) => (
-                              <FormItem
-                                key={value}
-                                className="flex items-center space-x-2"
-                              >
-                                <FormControl>
-                                  <RadioGroupItem value={value} />
-                                </FormControl>
-                                <FormLabel className="font-normal">{value}</FormLabel>
-                              </FormItem>
-                            ))}
-                          </RadioGroup>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                ))}
-
-
-              </form>
-            </Form>
-          </FormProvider>
-        </ScrollArea>
-        <AlertDialogFooter className="flex-col items-center sm:flex-row sm:justify-between">
-          <div className="flex w-full justify-between items-center">
-            <Button
-              onClick={handlePrevious}
-              type="button"
-              disabled={activeSection === 0 || isLoading}
-              variant="outline"
-              size="sm"
-            >
-              <ChevronLeftIcon className="mr-2 h-4 w-4" />
-              Previous
-            </Button>
-            <div className="flex space-x-2">
-              {sections.map((_, index) => (
-                <div
-                  key={index}
-                  className={`h-2 w-2 rounded-full ${index === activeSection ? "bg-primary" : "bg-gray-300"}`}
-                />
-              ))}
-            </div>
-            <Button type="submit" size="sm" disabled={isLoading}>
-              {activeSection === sections.length - 1 ? "Finish" : "Next"}
-              {isLoading ? (
-                <Icons.spinner className="ml-2 h-4 w-4 animate-spin" />
+        <FormProvider {...form}>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(handleSubmit, handleError)}>
+              <h4 className="scroll-m-20 border-b pb-2 text-lg font-semibold tracking-tight transition-colors mb-2">
+                {currentSection.title}
+              </h4>
+              {currentSection.key === "criticsmAndSuggestions" ? (
+                currentSection.statements.map((item, index) => (
+                  <>
+                    <FormField
+                      key={`${currentSection.key}-${index}`}
+                      control={form.control}
+                      name={`${currentSection.key}.${index}` as keyof z.infer<typeof surveySchema>}
+                      render={({ field }) => (
+                        <FormItem className="mb-4">
+                          <FormLabel>
+                            {item.statement}
+                          </FormLabel>
+                          <p className="text-sm text-gray-500">{item.translation}</p>
+                          <FormControl className="h-full">
+                            <textarea
+                              {...field}
+                              className="w-full p-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary h-full"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </>
+                ))
               ) : (
-                <ChevronRightIcon className="h-4 w-4" />
+                <ScrollArea className="!mb-4 h-[calc(100vh-10rem)] sm:h-96 px-1">
+                  {currentSection.statements.map((item, index) => (
+                    <FormField
+                      key={`${currentSection.key}-${index}`}
+                      control={form.control}
+                      name={`${currentSection.key}.${index}` as keyof z.infer<typeof surveySchema>}
+                      render={({ field }) => (
+                        <FormItem className="mb-4">
+                          <FormLabel>
+                            {index + 1}. {item.statement}
+                          </FormLabel>
+                          <p className="text-sm text-gray-500">{item.translation}</p>
+                          <FormControl>
+                            <RadioGroup
+                              onValueChange={field.onChange}
+                              value={field.value[index]}
+                              className="flex flex-row space-x-4 mt-2"
+                            >
+                              {["1", "2", "3", "4", "5"].map((value) => (
+                                <FormItem
+                                  key={`${currentSection.key}-${index}-${value}`}
+                                  className="flex items-center space-x-2"
+                                >
+                                  <FormControl>
+                                    <RadioGroupItem value={value} />
+                                  </FormControl>
+                                  <FormLabel className="font-normal">{value}</FormLabel>
+                                </FormItem>
+                              ))}
+                            </RadioGroup>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  ))}
+                </ScrollArea>
               )}
-            </Button>
-          </div>
-        </AlertDialogFooter>
+              <AlertDialogFooter className="flex-col items-center sm:flex-row sm:justify-between">
+                <div className="flex w-full justify-between items-center">
+                  <Button
+                    onClick={handlePrevious}
+                    type="button"
+                    disabled={activeSection === 0 || isLoading}
+                    variant="outline"
+                    size="sm"
+                  >
+                    <ChevronLeftIcon className="mr-2 h-4 w-4" />
+                    Previous
+                  </Button>
+                  <div className="flex space-x-2">
+                    {sections.map((_, index) => (
+                      <div
+                        key={index}
+                        className={`h-2 w-2 rounded-full ${index === activeSection ? "bg-primary" : "bg-gray-300"}`}
+                      />
+                    ))}
+                  </div>
+                  <Button type="submit" size="sm" disabled={isLoading}>
+                    {activeSection === sections.length - 1 ? "Finish" : "Next"}
+                    {isLoading ? (
+                      <Icons.spinner className="ml-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <ChevronRightIcon className="h-4 w-4" />
+                    )}
+                  </Button>
+                </div>
+              </AlertDialogFooter>
+            </form>
+          </Form>
+        </FormProvider>
       </AlertDialogContent>
     </AlertDialog>
   );

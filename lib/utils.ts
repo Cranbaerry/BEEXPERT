@@ -5,6 +5,7 @@ import { languages, LanguageDetails } from "./definitions";
 import { File } from "@web-std/file";
 import { PostgrestError, SupabaseClient } from "@supabase/supabase-js";
 import { formSchema } from "@/components/ui/questionnaire-form";
+import { surveySchema } from "@/components/ui/evaluation-form";
 import { z } from "zod";
 
 export function cn(...inputs: ClassValue[]) {
@@ -85,8 +86,8 @@ export async function isQuestionnaireFinished() {
   return data[0].user_id != null && data[0].questionnaires[0].user_id != null;
 }
 
-type FormData = z.infer<typeof formSchema>;
-export async function insertQuestionnaireData(values: FormData) {
+type questionnaireFormData = z.infer<typeof formSchema>;
+export async function insertQuestionnaireData(values: questionnaireFormData) {
   const supabase = createClient();
   const user = await getUserData(supabase);
   if (!user) return { error: "User is not logged in" };
@@ -123,6 +124,15 @@ export async function insertQuestionnaireData(values: FormData) {
 
   return { data: { userId: user.id } };
 }
+
+type evaluationFormData = z.infer<typeof surveySchema>;
+export async function insertEvaluationData(values: evaluationFormData) {
+  const supabase = createClient();
+  const user = await getUserData(supabase);
+  if (!user) return { error: "User is not logged in" };
+
+
+};
 
 export async function isNewUser() {
   const supabase = createClient();
