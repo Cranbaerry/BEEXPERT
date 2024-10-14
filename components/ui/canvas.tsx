@@ -196,121 +196,123 @@ function Canvas(props: CanvasProps) {
     <TooltipProvider>
       <Card className="h-full">
         <div className="flex bg-background h-full">
-          <ScrollArea className="w-16 bg-muted p-2 flex flex-col space-y-4 border-r">
-            <TooltipWrapper content="Drag">
-              <Button
-                onClick={() => setTool("drag")}
-                variant={tool === "drag" ? "default" : "ghost"}
-                size="icon"
-                className="tool__drag w-full"
-              >
-                <HandIcon className="h-4 w-4" />
-              </Button>
-            </TooltipWrapper>
-            <TooltipWrapper content="Pencil">
-              <Button
-                onClick={() => setTool("pencil")}
-                variant={tool === "pencil" ? "default" : "ghost"}
-                size="icon"
-                className="tool__pencil w-full"
-              >
-                <Pencil1Icon className="h-4 w-4" />
-              </Button>
-            </TooltipWrapper>
-            <TooltipWrapper content="Eraser">
-              <Button
-                onClick={() => setTool("eraser")}
-                variant={tool === "eraser" ? "default" : "ghost"}
-                size="icon"
-                className="tool__eraser w-full"
-              >
-                <EraserIcon className="h-4 w-4" />
-              </Button>
-            </TooltipWrapper>
-            <Separator className="my-2" />
-            <TooltipWrapper content="Color">
-              <div className="tool__color flex justify-center">
-                <ColorPicker
-                  color={colorRef.current}
-                  onChange={handleColorChange}
-                />
-              </div>
-            </TooltipWrapper>
-            <Separator className="my-2" />
-            <Popover>
-              <TooltipWrapper content="Stroke Width">
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="tool__stroke_width w-full"
-                  >
-                    <LineHeightIcon className="h-4 w-4" />
-                  </Button>
-                </PopoverTrigger>
+          <ScrollArea>
+            <div className="w-16 bg-muted p-2 flex flex-col space-y-4 border-r h-full">
+              <TooltipWrapper content="Drag">
+                <Button
+                  onClick={() => setTool("drag")}
+                  variant={tool === "drag" ? "default" : "ghost"}
+                  size="icon"
+                  className="tool__drag w-full"
+                >
+                  <HandIcon className="h-4 w-4" />
+                </Button>
               </TooltipWrapper>
-              <PopoverContent className="w-64">
-                <div className="flex flex-col space-y-2">
-                  <label htmlFor="stroke-width" className="text-sm font-medium">
-                    Stroke Width: {strokeWidth}px
-                  </label>
-                  <Slider
-                    id="stroke-width"
-                    min={1}
-                    max={20}
-                    step={1}
-                    value={[strokeWidth]}
-                    onValueChange={(value) => setStrokeWidth(value[0])}
+              <TooltipWrapper content="Pencil">
+                <Button
+                  onClick={() => setTool("pencil")}
+                  variant={tool === "pencil" ? "default" : "ghost"}
+                  size="icon"
+                  className="tool__pencil w-full"
+                >
+                  <Pencil1Icon className="h-4 w-4" />
+                </Button>
+              </TooltipWrapper>
+              <TooltipWrapper content="Eraser">
+                <Button
+                  onClick={() => setTool("eraser")}
+                  variant={tool === "eraser" ? "default" : "ghost"}
+                  size="icon"
+                  className="tool__eraser w-full"
+                >
+                  <EraserIcon className="h-4 w-4" />
+                </Button>
+              </TooltipWrapper>
+              <Separator className="my-2" />
+              <TooltipWrapper content="Color">
+                <div className="tool__color flex justify-center">
+                  <ColorPicker
+                    color={colorRef.current}
+                    onChange={handleColorChange}
                   />
                 </div>
-              </PopoverContent>
-            </Popover>
-            <Separator className="my-2" />
-            <TooltipWrapper content="Undo">
-              <Button
-                onClick={handleUndo}
-                disabled={historyStep <= 0}
-                size="icon"
-                variant="ghost"
-                className="tool__undo w-full"
-              >
-                <ArrowLeftIcon className="h-4 w-4" />
-              </Button>
-            </TooltipWrapper>
-            <TooltipWrapper content="Redo">
-              <Button
-                onClick={handleRedo}
-                disabled={historyStep >= history.length - 1}
-                size="icon"
-                variant="ghost"
-                className="tool__redo w-full"
-              >
-                <ArrowRightIcon className="h-4 w-4" />
-              </Button>
-            </TooltipWrapper>
-            <Separator className="my-2" />
-            <TooltipWrapper content="Zoom In">
-              <Button
-                onClick={handleZoomIn}
-                size="icon"
-                variant="ghost"
-                className="tool__zoom_in w-full"
-              >
-                <ZoomInIcon className="h-4 w-4" />
-              </Button>
-            </TooltipWrapper>
-            <TooltipWrapper content="Zoom Out">
-              <Button
-                onClick={handleZoomOut}
-                size="icon"
-                variant="ghost"
-                className="tool__zoom_out w-full"
-              >
-                <ZoomOutIcon className="h-4 w-4" />
-              </Button>
-            </TooltipWrapper>
-            <div className="text-xs text-center">
-              {Math.round(scale * 100)}%
+              </TooltipWrapper>
+              <Separator className="my-2" />
+              <Popover>
+                <TooltipWrapper content="Stroke Width">
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="tool__stroke_width w-full"
+                    >
+                      <LineHeightIcon className="h-4 w-4" />
+                    </Button>
+                  </PopoverTrigger>
+                </TooltipWrapper>
+                <PopoverContent className="w-64">
+                  <div className="flex flex-col space-y-2">
+                    <label htmlFor="stroke-width" className="text-sm font-medium">
+                      Stroke Width: {strokeWidth}px
+                    </label>
+                    <Slider
+                      id="stroke-width"
+                      min={1}
+                      max={20}
+                      step={1}
+                      value={[strokeWidth]}
+                      onValueChange={(value) => setStrokeWidth(value[0])}
+                    />
+                  </div>
+                </PopoverContent>
+              </Popover>
+              <Separator className="my-2" />
+              <TooltipWrapper content="Undo">
+                <Button
+                  onClick={handleUndo}
+                  disabled={historyStep <= 0}
+                  size="icon"
+                  variant="ghost"
+                  className="tool__undo w-full"
+                >
+                  <ArrowLeftIcon className="h-4 w-4" />
+                </Button>
+              </TooltipWrapper>
+              <TooltipWrapper content="Redo">
+                <Button
+                  onClick={handleRedo}
+                  disabled={historyStep >= history.length - 1}
+                  size="icon"
+                  variant="ghost"
+                  className="tool__redo w-full"
+                >
+                  <ArrowRightIcon className="h-4 w-4" />
+                </Button>
+              </TooltipWrapper>
+              <Separator className="my-2" />
+              <TooltipWrapper content="Zoom In">
+                <Button
+                  onClick={handleZoomIn}
+                  size="icon"
+                  variant="ghost"
+                  className="tool__zoom_in w-full"
+                >
+                  <ZoomInIcon className="h-4 w-4" />
+                </Button>
+              </TooltipWrapper>
+              <TooltipWrapper content="Zoom Out">
+                <Button
+                  onClick={handleZoomOut}
+                  size="icon"
+                  variant="ghost"
+                  className="tool__zoom_out w-full"
+                >
+                  <ZoomOutIcon className="h-4 w-4" />
+                </Button>
+              </TooltipWrapper>
+              <div className="text-xs text-center">
+                {Math.round(scale * 100)}%
+              </div>
             </div>
           </ScrollArea>
           <div className="flex-1 overflow-auto">
@@ -348,10 +350,10 @@ function Canvas(props: CanvasProps) {
                       height={(dimensions.height * 0.75) / scale}
                       width={
                         props.questionsSheetImageSource instanceof
-                        HTMLImageElement
+                          HTMLImageElement
                           ? (props.questionsSheetImageSource.width *
-                              ((dimensions.height * 0.75) / scale)) /
-                            props.questionsSheetImageSource.height
+                            ((dimensions.height * 0.75) / scale)) /
+                          props.questionsSheetImageSource.height
                           : undefined // Fallback in case it's not an HTMLImageElement
                       }
                       scaleX={scale}
