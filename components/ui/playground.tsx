@@ -92,7 +92,8 @@ export default function Playground({ language }: IPlaygroundProps) {
   );
   const [isEmbeddingModelActive, setIsEmbeddingModelActive] =
     useState<boolean>(false);
-  const [isSheetLoaded, setIsSheetLoaded] = useState<boolean>(false);
+
+  const [setIsSheetLoaded] = useState<boolean>(false);
   const [isMuted, setIsMuted] = useState<boolean>(false);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [isMessagesLoaded, setIsMessagesLoaded] = useState<boolean>(false);
