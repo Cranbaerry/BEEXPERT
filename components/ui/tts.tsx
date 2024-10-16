@@ -13,6 +13,7 @@ interface TTSProps {
   height?: number;
   onPlayingStatusChange: (status: boolean) => void;
   onReadingTextChange: (text: string) => void;
+  onFinishedTalking: () => void;
 }
 
 interface TTSQueueItem {
@@ -31,6 +32,7 @@ const TTS = forwardRef((props: TTSProps, ref) => {
     height = 200,
     onPlayingStatusChange,
     onReadingTextChange,
+    onFinishedTalking
   } = props;
   const [loading, setLoading] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -62,7 +64,11 @@ const TTS = forwardRef((props: TTSProps, ref) => {
   ).current;
   const ttsQueueSequence = useRef(0);
   const ttsQueueSequenceInterim = useRef(0);
-  const { add, clear } = useTaskQueue(ttsQueue);
+  const { add, clear, onFinished } = useTaskQueue(ttsQueue);
+  onFinished(() => {
+    console.log("All tasks have been completed!");
+    onFinishedTalking();
+  });
 
   const drawBar = useCallback(
     (

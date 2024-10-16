@@ -10,7 +10,13 @@ export async function POST(req: Request) {
   if (language === "id-ID")
     processedText = text
       .replace(/\bcos\b/gi, "kos")
-      .replace(/\bcosinus\b/gi, "kosinus");
+      .replace(/\bcosinus\b/gi, "kosinus")
+      .replace(/α/gi, "alpha")
+      .replace(/β/gi, "beta");
+
+  if (language === "en-US")
+    processedText = text
+      .replace(/·/gi, "times");
 
   // VOICE LIST: https://gist.github.com/BettyJJ/17cbaa1de96235a7f5773b8690a20462
   const langDetails = getLanguageDetailsById(language);

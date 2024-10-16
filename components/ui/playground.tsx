@@ -1,5 +1,5 @@
 "use client";
-import React, { useRef, useEffect, useState, useCallback } from "react";
+import React, { useRef, useEffect, useState, useCallback, use } from "react";
 import "regenerator-runtime/runtime";
 import SpeechRecognition, {
   useSpeechRecognition,
@@ -89,10 +89,10 @@ export default function Playground() {
     useState<HTMLImageElement | null>(null);
   const pauseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [status, setStatus] = useState<
-    "Listening" | "Speak to interrupt" | "Processing" | "Thinking"
+    "Listening" | "Speak to interrupt" | "Processing" | "Thinking" | "AI Disabled"
   >("Listening");
   const [activeStream, setActiveStream] = useState<"user" | "bot" | null>(
-    "user",
+    null,
   );
   const [isEmbeddingModelActive, setIsEmbeddingModelActive] =
     useState<boolean>(false);
@@ -223,22 +223,24 @@ export default function Playground() {
         clearTimeout(pauseTimerRef.current);
       }
     };
-  }, [finalTranscript, append, resetTranscript, language]);
+  }, [finalTranscript, append, resetTranscript, language, workflow]);
 
   useEffect(() => {
-    if (messages.length > 0 && isMessagesLoaded) {
-      const latestMessage = messages[messages.length - 1];
-      const content = latestMessage.content;
-      if (latestMessage?.role === "assistant") {
-        if (content && /[.!?:]$/.test(content)) {
-          setMessageBuffer(content);
+    if (workflow?.use_ai) {
+      if (messages.length > 0 && isMessagesLoaded) {
+        const latestMessage = messages[messages.length - 1];
+        const content = latestMessage.content;
+        if (latestMessage?.role === "assistant") {
+          if (content && /[.!?:]$/.test(content)) {
+            setMessageBuffer(content);
+          }
         }
       }
     }
-  }, [messages, isMessagesLoaded]);
+  }, [messages, isMessagesLoaded, workflow]);
 
   useEffect(() => {
-    if (messageBuffer.length > 0) {
+    if (workflow?.use_ai && messageBuffer.length > 0) {
       const currentMessage = messageBuffer.replace(messageBufferRead, "");
       const sentences = currentMessage.match(/[^.!?]+[.!?]+/g) || [];
       setMessageBufferRead(messageBuffer);
@@ -251,7 +253,7 @@ export default function Playground() {
         }
       });
     }
-  }, [messageBuffer, messageBufferRead, language]);
+  }, [messageBuffer, messageBufferRead, language, workflow]);
 
   useEffect(() => {
     const fetchInitialWorkflow = async () => {
@@ -346,8 +348,12 @@ export default function Playground() {
   }, [setMessages, supabase, loadWorkflowSetup]);
 
   useEffect(() => {
-    if (activeStream === "user") {
+    console.log("activeStream changed:", activeStream);
+    if (activeStream === null) {
+      setStatus("AI Disabled");
+    } else if (activeStream === "user") {
       setStatus("Listening");
+      console.log("Clearing TTS queue");
       if (ttsRef.current) ttsRef.current.clearTTSQueue();
       navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
         if (ttsRef.current) {
@@ -360,14 +366,10 @@ export default function Playground() {
   }, [activeStream]);
 
   useEffect(() => {
-    if (transcript.trim() !== "") {
+    if (transcript.trim() !== "" && workflow?.use_ai) {
       setActiveStream("user");
     }
-  }, [transcript]);
-
-  useEffect(() => {
-    console.log("activeStream changed:", activeStream);
-  }, [activeStream]);
+  }, [transcript, workflow?.use_ai]);
 
   useEffect(() => {
     const langDetails = getLanguageDetailsById(language);
@@ -382,32 +384,39 @@ export default function Playground() {
         status,
         tts?.getTTSQueueCount(),
       );
-    if (status) {
+
+    if (!workflow?.use_ai) {
+      setActiveStream(null);
+    } else if (status) {
       setActiveStream("bot");
-    } else if (tts && tts?.getTTSQueueCount() === 0) {
-      setActiveStream("user");
     }
-  }, []);
+
+  }, [workflow?.use_ai]);
 
   const handleTTSOnReadingTextChange = useCallback((text: string) => {
     setCurrentlyPlayingTTSText(text.trim());
   }, []);
 
+  const handleTTSFinishedTalking = useCallback(() => {
+    setActiveStream("user");
+  }, []);
+
   const isTabActive = useTabActive();
 
   useEffect(() => {
-    if (isTabActive && !isMuted) {
+    if (workflow?.use_ai && isTabActive && !isMuted) {
       SpeechRecognition.startListening({
         continuous: true,
         interimResults: true,
         language: language,
       });
     } else {
-      if (listening) {
-        SpeechRecognition.stopListening();
-      }
+      // if (listening) {
+      //   SpeechRecognition.stopListening();
+      // }
+      SpeechRecognition.abortListening();
     }
-  }, [isTabActive, isMuted, language, listening]);
+  }, [isTabActive, isMuted, language, listening, workflow]);
 
   const toggleMicrophone = useCallback(() => {
     if (isMuted) {
@@ -434,7 +443,8 @@ export default function Playground() {
         stream.getTracks().forEach((track) => track.stop());
         setStream(null);
       }
-      SpeechRecognition.stopListening();
+      // SpeechRecognition.stopListening();
+      SpeechRecognition.abortListening();
       setIsMuted(true);
       toast.info("Microphone is now muted.");
     }
@@ -514,6 +524,7 @@ export default function Playground() {
             height={40}
             onPlayingStatusChange={handleTTSPlayingStatusChange}
             onReadingTextChange={handleTTSOnReadingTextChange}
+            onFinishedTalking={handleTTSFinishedTalking}
           />
           <Badge className="mx-2 whitespace-nowrap">{status}</Badge>
         </div>

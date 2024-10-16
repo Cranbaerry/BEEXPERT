@@ -143,7 +143,7 @@ export default function PertanyaanUmumSection() {
                     </FormControl>
                     <FormLabel className="font-normal">Yes</FormLabel>
                   </FormItem>
-                  <FormItem className="flex items-center space-x-3 space-y-0 ml-10">
+                  <FormItem className="flex items-center space-x-3 space-y-0 ml-6">
                     <FormControl>
                       <RadioGroupItem value="no" />
                     </FormControl>
@@ -176,19 +176,19 @@ export default function PertanyaanUmumSection() {
                     </FormControl>
                     <FormLabel className="font-normal">Lack</FormLabel>
                   </FormItem>
-                  <FormItem className="flex items-center space-x-3 space-y-0 ml-10">
+                  <FormItem className="flex items-center space-x-3 space-y-0 ml-6">
                     <FormControl>
                       <RadioGroupItem value="limited_understanding" />
                     </FormControl>
                     <FormLabel className="font-normal">Limited</FormLabel>
                   </FormItem>
-                  <FormItem className="flex items-center space-x-3 space-y-0 ml-10">
+                  <FormItem className="flex items-center space-x-3 space-y-0 ml-6">
                     <FormControl>
                       <RadioGroupItem value="moderate_understanding" />
                     </FormControl>
                     <FormLabel className="font-normal">Moderate</FormLabel>
                   </FormItem>
-                  <FormItem className="flex items-center space-x-3 space-y-0 ml-10">
+                  <FormItem className="flex items-center space-x-3 space-y-0 ml-6">
                     <FormControl>
                       <RadioGroupItem value="extensive_understanding" />
                     </FormControl>
@@ -221,7 +221,7 @@ export default function PertanyaanUmumSection() {
                     </FormControl>
                     <FormLabel className="font-normal">Yes</FormLabel>
                   </FormItem>
-                  <FormItem className="flex items-center space-x-3 space-y-0 ml-10">
+                  <FormItem className="flex items-center space-x-3 space-y-0 ml-6">
                     <FormControl>
                       <RadioGroupItem value="no" />
                     </FormControl>
@@ -254,7 +254,7 @@ export default function PertanyaanUmumSection() {
                     </FormControl>
                     <FormLabel className="font-normal">Yes</FormLabel>
                   </FormItem>
-                  <FormItem className="flex items-center space-x-3 space-y-0 ml-10">
+                  <FormItem className="flex items-center space-x-3 space-y-0 ml-6">
                     <FormControl>
                       <RadioGroupItem value="no" />
                     </FormControl>

@@ -28,8 +28,13 @@ export class TaskQueue<T, R = void> {
   private _listeners: TaskQueueListener[] = [];
   private _error: Error | undefined;
   private _abortController: AbortController | undefined;
+  private _onFinishedCallback: (() => void) | undefined;
 
-  constructor(private run: TaskRunner<T, R>) {}
+  constructor(private run: TaskRunner<T, R>) { }
+
+  onFinished = (callback: () => void) => {
+    this._onFinishedCallback = callback;
+  };
 
   listen = (listener: TaskQueueListener) => {
     this._listeners.push(listener);
@@ -105,6 +110,9 @@ export class TaskQueue<T, R = void> {
           this.notify();
           this.check();
         });
+    } else if (!this._queuedTasks.length && !this._currentTask) {
+      // If no more tasks are left, call the onFinished callback
+      this._onFinishedCallback?.();
     }
   };
 
@@ -123,7 +131,7 @@ export class TaskQueue<T, R = void> {
 
 export const useTaskQueue = <T, R = void>(
   queue: TaskQueue<T, R>,
-): State<T, R> => {
+): State<T, R> & { onFinished: (callback: () => void) => void } => {
   const [state, setState] = useState<State<T, R>>({
     add: queue.add,
     resume: queue.resume,
@@ -154,5 +162,8 @@ export const useTaskQueue = <T, R = void>(
     };
   }, [queue]);
 
-  return state;
+  return {
+    ...state,
+    onFinished: queue.onFinished,
+  };
 };
