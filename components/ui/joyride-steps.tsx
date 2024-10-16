@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { CallBackProps, STATUS, Step } from "react-joyride";
 import dynamic from "next/dynamic";
 import { isNewUser, isQuestionnaireFinished } from "@/lib/utils";
+import { getUserData } from "@/lib/utils";
+import { createClient } from "@/lib/supabase/client";
 
 interface State {
     run: boolean;
@@ -15,6 +17,29 @@ const Joyride = dynamic(
 );
 
 const JoyrideSteps = () => {
+    const supabase = createClient();
+    const handleProfileInsertion = async (payload: { new: { user_id: string } }) => {
+        const user = await getUserData();
+        if (!user) return;
+        if (payload.new.user_id === user.id) {
+            setState({ run: true, steps });
+        }
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const channel = supabase
+        .channel('profiles-changes')
+        .on(
+            'postgres_changes',
+            {
+                event: 'INSERT',
+                schema: 'public',
+                table: 'profiles',
+            },
+            handleProfileInsertion
+        )
+        .subscribe()
+
     const handleJoyrideCallback = (data: CallBackProps) => {
         const { status } = data;
         const finishedStatuses: string[] = [STATUS.FINISHED, STATUS.SKIPPED];
@@ -23,17 +48,6 @@ const JoyrideSteps = () => {
             setState({ run: false, steps });
         }
     };
-
-    useEffect(() => {
-        const fetchNewUser = async () => {
-            const [newUser, isFinished] = await Promise.all([isNewUser(), isQuestionnaireFinished()]);
-            if (newUser && isFinished) {
-                setState({ run: true, steps });
-            }
-        };
-
-        fetchNewUser().catch(console.error);
-    }, [steps]);
 
     const [{ run, steps }, setState] = useState<State>({
         run: false,
@@ -49,9 +63,9 @@ const JoyrideSteps = () => {
                 placement: "center",
                 target: "body",
                 title: (
-                    <h2 className="font-bold">
-                        Let&apos;s explore the features available on BEEXPERT!
-                    </h2>
+                    <div className="font-bold">
+                        Explore BEEXPERT features!                     
+                    </div>
                 ),
             },
             {
@@ -63,7 +77,7 @@ const JoyrideSteps = () => {
                 ),
                 placement: "bottom",
                 target: ".switch__lang",
-                title: <h2 className="font-bold">Change Language</h2>,
+                title: <div className="font-bold">Change Language</div>,
             },
             {
                 content: (
@@ -78,7 +92,7 @@ const JoyrideSteps = () => {
                     },
                 },
                 target: ".demo__project",
-                title: <h2 className="font-bold">Demo Video</h2>,
+                title: <div className="font-bold">Demo Video</div>,
             },
             {
                 content: (
@@ -93,7 +107,7 @@ const JoyrideSteps = () => {
                     },
                 },
                 target: ".tool__drag",
-                title: <h2 className="font-bold">Tool: Drag</h2>,
+                title: <div className="font-bold">Tool: Drag</div>,
             },
             {
                 content: (
@@ -108,7 +122,7 @@ const JoyrideSteps = () => {
                     },
                 },
                 target: ".tool__pencil",
-                title: <h2 className="font-bold">Tool: Pencil</h2>,
+                title: <div className="font-bold">Tool: Pencil</div>,
             },
             {
                 content: (
@@ -123,7 +137,7 @@ const JoyrideSteps = () => {
                     },
                 },
                 target: ".tool__eraser",
-                title: <h2 className="font-bold">Tool: Eraser</h2>,
+                title: <div className="font-bold">Tool: Eraser</div>,
             },
             {
                 content: (
@@ -138,7 +152,7 @@ const JoyrideSteps = () => {
                     },
                 },
                 target: ".tool__stroke_width",
-                title: <h2 className="font-bold">Tool: Stroke Width</h2>,
+                title: <div className="font-bold">Tool: Stroke Width</div>,
             },
             {
                 content: (
@@ -151,7 +165,7 @@ const JoyrideSteps = () => {
                     },
                 },
                 target: ".tool__undo",
-                title: <h2 className="font-bold">Tool: Undo</h2>,
+                title: <div className="font-bold">Tool: Undo</div>,
             },
             {
                 content: (
@@ -164,7 +178,7 @@ const JoyrideSteps = () => {
                     },
                 },
                 target: ".tool__redo",
-                title: <h2 className="font-bold">Tool: Redo</h2>,
+                title: <div className="font-bold">Tool: Redo</div>,
             },
             {
                 content: (
@@ -179,7 +193,7 @@ const JoyrideSteps = () => {
                     },
                 },
                 target: ".tool__zoom_in",
-                title: <h2 className="font-bold">Tool: Zoom In</h2>,
+                title: <div className="font-bold">Tool: Zoom In</div>,
             },
             {
                 content: (
@@ -194,7 +208,7 @@ const JoyrideSteps = () => {
                     },
                 },
                 target: ".tool__zoom_out",
-                title: <h2 className="font-bold">Tool: Zoom Out</h2>,
+                title: <div className="font-bold">Tool: Zoom Out</div>,
             },
             {
                 content: (
@@ -209,7 +223,7 @@ const JoyrideSteps = () => {
                     },
                 },
                 target: ".tool__mute",
-                title: <h2 className="font-bold">Tool: Mute/Unmute Microphone</h2>,
+                title: <div className="font-bold">Tool: Mute/Unmute Microphone</div>,
             },
             {
                 content: (
@@ -224,7 +238,7 @@ const JoyrideSteps = () => {
                     },
                 },
                 target: ".chat__log",
-                title: <h2 className="font-bold">Tool: Chat Log</h2>,
+                title: <div className="font-bold">Tool: Chat Log</div>,
             },
             {
                 content: (
@@ -238,10 +252,21 @@ const JoyrideSteps = () => {
                 },
                 placement: "center",
                 target: "body",
-                title: <h2 className="font-bold">You&apos;re Ready to Learn</h2>,
+                title: <div className="font-bold">You&apos;re ready to learn</div>,
             },
         ],
     });
+
+    useEffect(() => {
+        const fetchNewUser = async () => {
+            const [newUser, isFinished] = await Promise.all([isNewUser(), isQuestionnaireFinished()]);
+            if (newUser && isFinished) {
+                setState({ run: true, steps });
+            }
+        };
+
+        fetchNewUser().catch(console.error);
+    }, [steps]);
 
     return (
         <Joyride
@@ -264,5 +289,5 @@ const JoyrideSteps = () => {
     );
 };
 
-JoyrideSteps.name = "JoyrideSteps";
+// JoyrideSteps.name = "JoyrideSteps";
 export default JoyrideSteps;

@@ -40,6 +40,7 @@ import EvaluationForm from "./evaluation-form";
 import QuestionnaireForm from "./questionnaire-form";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { getLanguageDetailsById } from "@/lib/utils";
+import JoyrideSteps from "@/components/ui/joyride-steps";
 
 const Canvas = dynamic(() => import("@/components/ui/canvas"), {
   ssr: false,
@@ -570,6 +571,7 @@ export default function Playground() {
           <FlexibleQuestionDialog canvasRef={canvasRef.current} workflow={workflow} />
         </div>
       </div>
+      <JoyrideSteps />
     </>
   );
 }
