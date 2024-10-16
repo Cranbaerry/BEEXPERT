@@ -1,4 +1,4 @@
-import { Stage, Layer, Line, Text, Rect } from "react-konva";
+import { Stage, Layer, Line, Rect } from "react-konva";
 import React, { useEffect, useRef, useState, useImperativeHandle } from "react";
 import { KonvaEventObject } from "konva/lib/Node";
 import { CanvasProps, LineData } from "@/lib/definitions";
@@ -55,6 +55,7 @@ function Canvas(props: CanvasProps) {
   useImperativeHandle(props.canvasRef, () => ({
     handleExport: () => handleExport(),
     getDimensions: () => dimensions,
+    resetCanvas: () => resetCanvas(),
   }));
 
   const handleUndo = () => {
@@ -154,6 +155,13 @@ function Canvas(props: CanvasProps) {
     colorRef.current = e;
   };
 
+  const resetCanvas = () => {
+    setLines([]);
+    setHistory([]);
+    setHistoryStep(-1);
+    setShowPlaceholder(true);
+  };
+
   useEffect(() => {
     handleResize();
     window.addEventListener("resize", handleResize);
@@ -229,6 +237,17 @@ function Canvas(props: CanvasProps) {
                 </Button>
               </TooltipWrapper>
               <Separator className="my-2" />
+              {/* <TooltipWrapper content="Reset">
+                <Button
+                  onClick={resetCanvas}
+                  size="icon"
+                  variant="ghost"
+                  className="tool__reset w-full"
+                >
+                  <TrashIcon className="h-4 w-4" />
+                </Button>
+              </TooltipWrapper>
+              <Separator className="my-2" /> */}
               <TooltipWrapper content="Color">
                 <div className="tool__color flex justify-center">
                   <ColorPicker
@@ -376,7 +395,7 @@ function Canvas(props: CanvasProps) {
                       }
                     />
                   ))}
-                  {showPlaceholder && (
+                  {/* {showPlaceholder && (
                     <Text
                       text="Interact to start drawing"
                       x={dimensions.width / 2}
@@ -390,7 +409,7 @@ function Canvas(props: CanvasProps) {
                       offsetY={40}
                       padding={20}
                     />
-                  )}
+                  )} */}
                 </Layer>
               </Stage>
             </div>

@@ -65,13 +65,13 @@ export default function ChatDrawer({ chatLog }: ChatDrawerProps) {
       if (userData) {
         const userName = await supabase
           .from("profiles")
-          .select("fullname")
+          .select("full_name")
           .eq("user_id", userData.id)
           .single();
-        if (userName) setUserName(userName.data?.fullname ?? "User");
+        if (userName) setUserName(userName.data?.full_name ?? "User");
         setProfilePictureUrl(
           userData.user_metadata?.profilePictureUrl ??
-            `https://api.dicebear.com/6.x/initials/svg?seed=${userName.data?.fullname ?? "User"}`,
+            `https://api.dicebear.com/6.x/initials/svg?seed=${userName.data?.full_name ?? "User"}`,
         );
       }
     };

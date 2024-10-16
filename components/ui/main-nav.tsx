@@ -8,16 +8,16 @@ import { ExitIcon } from "@radix-ui/react-icons";
 import { LanguageCode } from "@/lib/definitions";
 import { logout } from "@/app/logout/actions";
 import { DialogDemo } from "./demo-dialog";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "./alert-dialog";
-
+// import {
+//   AlertDialog,
+//   AlertDialogAction,
+//   AlertDialogContent,
+//   AlertDialogDescription,
+//   AlertDialogFooter,
+//   AlertDialogHeader,
+//   AlertDialogTitle,
+// } from "./alert-dialog";
+import { toast } from "sonner";
 interface IMainNavProps extends React.HTMLAttributes<HTMLElement> {
   enableChangeLanguage?: boolean;
   language?: LanguageCode;
@@ -32,7 +32,7 @@ export function MainNav({
   ...props
 }: IMainNavProps) {
   const [isLanguageEN, setIsLanguageEN] = useState(true);
-  const [isAlertChangeLangOpen, setIsAlertChangeLangOpen] = useState(false);
+  // const [isAlertChangeLangOpen, setIsAlertChangeLangOpen] = useState(false);
 
   useEffect(() => {
     if (isLanguageEN) {
@@ -44,7 +44,8 @@ export function MainNav({
 
   const onChangeLanguageToggle = () => {
     setIsLanguageEN(!isLanguageEN);
-    setIsAlertChangeLangOpen(true);
+    // setIsAlertChangeLangOpen(true);
+    toast.info(`Language has been changed to ${isLanguageEN ? "English" : "Indonesian"}.`);
   };
 
   return (
@@ -76,7 +77,7 @@ export function MainNav({
         </button>
       </form>
 
-      <AlertDialog
+      {/* <AlertDialog
         open={isAlertChangeLangOpen}
         onOpenChange={setIsAlertChangeLangOpen}
       >
@@ -98,7 +99,7 @@ export function MainNav({
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
-      </AlertDialog>
+      </AlertDialog> */}
     </nav>
   );
 }

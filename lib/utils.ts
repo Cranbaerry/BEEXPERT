@@ -92,7 +92,7 @@ export async function insertQuestionnaireData(values: questionnaireFormData) {
   const user = await getUserData(supabase, false);
   if (!user) return { data: null, error: "User is not logged in" };
 
-  const { error } = await supabase.from("profiles").insert({
+  const { error: profileError } = await supabase.from("profiles").insert({
     full_name: values.fullName,
     whatsapp_number: values.whatsappNumber,
     gender: values.gender,
@@ -100,29 +100,21 @@ export async function insertQuestionnaireData(values: questionnaireFormData) {
     education_level: values.educationLevel,
     school: values.school,
   });
-  if (error) return { data: null, error: error.message };
+  if (profileError) return { data: null, error: profileError.message };
 
-  const insertPromises = Object.entries(values).map(async ([key, value]) => {
-    const answerObject = {
+  const insertData = Object.entries(values).map(([key, value]) => ({
+    question_id: key,
+    answer: {
       type: typeof value,
       value: value,
-    };
+    },
+  }));
 
-    const { error } = await supabase.from("questionnaires").insert({
-      question_id: key,
-      answer: answerObject,
-    });
-    if (error) throw error;
-  });
+  const { error: insertError } = await supabase.from("questionnaires").insert(insertData);
 
-  try {
-    await Promise.all(insertPromises);
-  } catch (error: unknown) {
-    const err = error as PostgrestError;
-    return { data:null, error: err.message };
-  }
+  if (insertError) return { data: null, error: insertError.message };
 
-  return { data: { userId: user.id }, error:null };
+  return { data: { userId: user.id }, error: null };
 }
 
 type evaluationFormData = z.infer<typeof surveySchema>;

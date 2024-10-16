@@ -68,7 +68,7 @@ function AuthPageContent({ isAuthCodeError }: { isAuthCodeError: boolean }) {
       toast.success("Successfully signed up", {
         description: `Hello ${data?.user?.email ?? "Guest"}`,
       });
-      router.push("/pre-test");
+      router.push("/playground");
     },
     [router],
   );
@@ -97,7 +97,7 @@ function AuthPageContent({ isAuthCodeError }: { isAuthCodeError: boolean }) {
       toast.success("Successfully logged in", {
         description: `Hello ${data?.user?.email ?? "Guest"}`,
       });
-      router.push("/pre-test");
+      router.push("/playground");
     },
     [router],
   );

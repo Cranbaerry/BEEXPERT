@@ -46,3 +46,41 @@ export const languages: LanguageDetails[] = [
 ];
 
 export type LanguageCode = (typeof languages)[number]["id"];
+
+export type Workflow = {
+  id: number;
+  name: string;
+  image_url: string;
+  notify: boolean;
+  options: QuestionInput;
+  next_workflow_id?: number;
+  use_ai: boolean;
+};
+
+export type Profile = {
+  workflow_id?: number;
+  notify?: boolean;
+};
+
+export type RealtimePostgresUpdatePayload<T> = {
+  old?: T;
+  new?: T;
+};
+
+export type Option = {
+  id: string
+  text: string
+}
+
+export type EssayInput = {
+  id: string
+  label: string
+  type: "short" | "long"
+}
+
+export type QuestionInput = {
+  type: "multiple-choice" | "essay"
+  options?: Option[]
+  correctAnswer?: string
+  essayInputs?: EssayInput[]
+}

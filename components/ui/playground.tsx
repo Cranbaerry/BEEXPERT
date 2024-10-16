@@ -19,9 +19,9 @@ import { Badge } from "@/components/ui/badge";
 import { CreateMessage, Message, useChat } from "ai/react";
 import { ChatRequestOptions, JSONValue } from "ai";
 import { toast } from "sonner";
-import { CanvasRef, LanguageCode } from "@/lib/definitions";
+import { CanvasRef, LanguageCode, Profile, Workflow } from "@/lib/definitions";
 import { useTabActive } from "@/hooks/use-tab-active";
-import { DialogFinalAnswer } from "./final-answer-dialog";
+// import { DialogFinalAnswer } from "./final-answer-dialog";
 import { Icons } from "@/components/ui/icons";
 import { Button } from "./button";
 import { Mic, MicOff } from "lucide-react";
@@ -34,6 +34,9 @@ import {
 import ChatDrawer from "@/components/ui/chat-drawer";
 import { getUserData } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
+import { RealtimePostgresUpdatePayload } from '@supabase/supabase-js';
+import FlexibleQuestionDialog from "@/components/ui/flexible-question-dialog";
+import EvaluationForm from "./evaluation-form";
 
 const Canvas = dynamic(() => import("@/components/ui/canvas"), {
   ssr: false,
@@ -89,10 +92,69 @@ export default function Playground({ language }: IPlaygroundProps) {
   );
   const [isEmbeddingModelActive, setIsEmbeddingModelActive] =
     useState<boolean>(false);
+  const [isSheetLoaded, setIsSheetLoaded] = useState<boolean>(false);
   const [isMuted, setIsMuted] = useState<boolean>(false);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [isMessagesLoaded, setIsMessagesLoaded] = useState<boolean>(false);
   const supabase = createClient();
+  const [workflow, setWorkflow] = useState<Workflow | null>(null);
+  const handleWorkflowChanges = async (payload: RealtimePostgresUpdatePayload<Profile>) => {
+    const { new: newProfile } = payload;
+
+    if (newProfile) {
+      const { workflow_id } = newProfile;
+
+      if (workflow_id) {
+        loadWorkflowSetup(workflow_id);
+      }
+    }
+  };
+
+  const loadWorkflowSetup = useCallback(async (workflowId: number) => {
+    const { data, error } = await supabase
+      .from('workflows')
+      .select('*')
+      .eq('id', workflowId)
+      .single();
+
+    const workflow = data as Workflow;
+    if (error) {
+      toast.error('Failed to fetch workflow, please refresh and try again.');
+      return;
+    }
+
+    setWorkflow(workflow);
+    setIsSheetLoaded(false);
+    loadImage(workflow?.image_url)
+      .then((image) => {
+        setQuestionSheetImageSource(image);
+      })
+      .catch(() => {
+        toast.error(
+          'Failed to load question sheet, please refresh and try again..'
+        );
+      }).finally(() => {
+        setIsSheetLoaded(true);
+      });
+
+    if (workflow.notify) {
+      toast.info(`You are now working on ${workflow?.name}.`);
+    }
+  }, [supabase]);
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const channel = supabase
+    .channel('profiles-changes')
+    .on(
+      'postgres_changes',
+      {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'profiles',
+      },
+      handleWorkflowChanges
+    )
+    .subscribe()
 
   const {
     transcript,
@@ -182,15 +244,29 @@ export default function Playground({ language }: IPlaygroundProps) {
   }, [messageBuffer, messageBufferRead, language]);
 
   useEffect(() => {
-    loadImage("/soal/identitas-trigonometri.png")
-      .then((image) => {
-        setQuestionSheetImageSource(image);
-      })
-      .catch(() => {
-        toast.error(
-          "Failed to load question sheet, please refresh and try again..",
-        );
-      });
+    const fetchInitialWorkflow = async () => {
+      const user = await getUserData(supabase);
+      if (!user) {
+        console.error('User is not logged in');
+        return;
+      }
+
+      const { data: dbProfile, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+
+      if (error) {
+        console.error('Error fetching profile:', error);
+        return;
+      }
+
+      const profile = dbProfile as Profile;
+      if (profile.workflow_id) {
+        loadWorkflowSetup(profile.workflow_id);
+      }
+    };
 
     const handleEmbeddingModelLoad = async () => {
       const callApiUntilOk = async () => {
@@ -254,9 +330,10 @@ export default function Playground({ language }: IPlaygroundProps) {
       setIsMessagesLoaded(true);
     };
 
+    fetchInitialWorkflow();
     handleEmbeddingModelLoad();
     handleMessagesLoad();
-  }, [setMessages, supabase]);
+  }, [setMessages, supabase, loadWorkflowSetup]);
 
   useEffect(() => {
     if (activeStream === "user") {
@@ -358,6 +435,7 @@ export default function Playground({ language }: IPlaygroundProps) {
 
   return (
     <>
+      {workflow?.id === 4 && <EvaluationForm />}
       {!browserSupportsSpeechRecognition && (
         <AlertDialog defaultOpen={true}>
           <AlertDialogContent>
@@ -398,7 +476,7 @@ export default function Playground({ language }: IPlaygroundProps) {
           <AlertDialogHeader>
             <AlertDialogDescription className="flex flex-col items-center space-y-4">
               <Icons.spinner className="h-14 w-14 animate-spin" />
-              <p>Please wait while we load embedding model...</p>
+              <p>Please wait while we set things up in the background...</p>
             </AlertDialogDescription>
           </AlertDialogHeader>
         </AlertDialogContent>
@@ -455,7 +533,8 @@ export default function Playground({ language }: IPlaygroundProps) {
             </Tooltip>
           </TooltipProvider>
           <ChatDrawer chatLog={messages} />
-          <DialogFinalAnswer canvasRef={canvasRef.current} />
+          <FlexibleQuestionDialog canvasRef={canvasRef.current} workflow={workflow} />
+          {/* <DialogFinalAnswer canvasRef={canvasRef.current} /> */}
         </div>
       </div>
     </>

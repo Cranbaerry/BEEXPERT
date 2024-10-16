@@ -12,7 +12,7 @@ async function AuthenticationPage({
   const supabase = createClient();
   const userData = await getUserData(supabase);
   const isAuthCodeError = "auth-code-error" in searchParams;
-  if (userData) redirect("/pre-test");
+  if (userData) redirect("/playground");
 
   return (
     <div className="container relative flex h-screen flex-col items-center justify-center lg:grid lg:max-w-none lg:grid-cols-2 lg:px-0">
