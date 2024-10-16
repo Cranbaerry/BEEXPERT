@@ -182,6 +182,10 @@ export default function Playground() {
 
   useEffect(() => {
     const sendTranscript = () => {
+      if (!workflow?.use_ai) {
+        toast.info("AI is disabled for this assessment.");
+        return
+      }
       if (finalTranscript.trim() !== "") {
         setStatus("Processing");
         if (ttsRef.current) ttsRef.current.clearTTSQueue();
