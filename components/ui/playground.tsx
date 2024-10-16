@@ -103,6 +103,7 @@ export default function Playground() {
   const [isMessagesLoaded, setIsMessagesLoaded] = useState<boolean>(false);
   const supabase = createClient();
   const [workflow, setWorkflow] = useState<Workflow | null>(null);
+  const hasUserSpoken = useRef<boolean>(false);
   const handleWorkflowChanges = async (payload: RealtimePostgresUpdatePayload<Profile>) => {
     const { new: newProfile } = payload;
 
@@ -204,6 +205,7 @@ export default function Playground() {
 
         console.log("Sending transcript:", finalTranscript);
         append(message, canvasDataUrl ? options : undefined);
+        hasUserSpoken.current = true;
       }
     };
 
@@ -226,7 +228,7 @@ export default function Playground() {
   }, [finalTranscript, append, resetTranscript, language, workflow]);
 
   useEffect(() => {
-    if (workflow?.use_ai) {
+    if (workflow?.use_ai && hasUserSpoken.current) {
       if (messages.length > 0 && isMessagesLoaded) {
         const latestMessage = messages[messages.length - 1];
         const content = latestMessage.content;
@@ -249,6 +251,7 @@ export default function Playground() {
         const trimmedSentence = sentence.trim();
         if (trimmedSentence && ttsRef.current) {
           console.log("Sentence:", trimmedSentence);
+          // console.log('use_ai:', workflow?.use_ai);
           ttsRef.current.generateTTS(trimmedSentence, language);
         }
       });
@@ -392,6 +395,12 @@ export default function Playground() {
     }
 
   }, [workflow?.use_ai]);
+
+  useEffect(() => {
+    if (workflow?.use_ai) {
+      setActiveStream("user");
+    }
+  }, [workflow?.use_ai, setActiveStream]);
 
   const handleTTSOnReadingTextChange = useCallback((text: string) => {
     setCurrentlyPlayingTTSText(text.trim());
