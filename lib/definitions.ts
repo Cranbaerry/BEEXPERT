@@ -7,6 +7,7 @@ export type CanvasProps = {
 export type CanvasRef = {
   handleExport: () => string;
   getDimensions: () => { width: number; height: number };
+  resetCanvas: () => void;
 };
 
 // export type CanvasWrapperProps = {

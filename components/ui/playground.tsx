@@ -144,8 +144,11 @@ export default function Playground() {
           // setIsSheetLoaded(true);
         });
 
-    if (workflow.notify) {
+    if (workflow.notify)
       toast.info(`You are now working on ${workflow?.name}.`);
+    
+    if (canvasRef.current) {
+      canvasRef.current.resetCanvas();
     }
   }, [supabase]);
 
