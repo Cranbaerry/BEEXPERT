@@ -149,7 +149,7 @@ export default function Playground() {
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const channel = supabase
-    .channel('profiles-changes')
+    .channel('profiles-changes-pg')
     .on(
       'postgres_changes',
       {
@@ -544,7 +544,7 @@ export default function Playground() {
                 </ToggleGroup>
               </TooltipTrigger>
               <TooltipContent>
-                <p>{isMuted ? "Unmute microphone" : "Mute microphone"}</p>
+                <p>Switch language</p>
               </TooltipContent>
             </Tooltip>
             <Tooltip>

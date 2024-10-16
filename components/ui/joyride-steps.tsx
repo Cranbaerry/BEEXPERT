@@ -28,7 +28,7 @@ const JoyrideSteps = () => {
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const channel = supabase
-        .channel('profiles-changes')
+        .channel('profiles-changes-joyride')
         .on(
             'postgres_changes',
             {
