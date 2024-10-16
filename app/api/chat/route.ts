@@ -134,16 +134,19 @@ export async function POST(req: Request) {
 
             Do NOT provide the final solution, and ensure your responses are simple, clear, and easy to understand. Keep your replies free from special formatting. Offer words of motivation such as "You are on the right track!" and "Great effort, keep going!" Encourage persistence with phrases like "Your hard work is paying off!" or "You’re almost there, keep it up!" Provide appreciation such as "Thank you for trying, your determination is impressive" or "Your solution is correct because you never gave up!"
 
-            Use words instead of symbols. For example:
+            ${data.languageId === 'id-ID' ? `
+              Use words instead of symbols. For example:
 
-            "+" should be "plus"
-            "-" should be "minus"
-            "∑" should be "sum"
-            "√" should be "square root"
-            "α" should be "alpha"
-            "β" should be "beta" For powers and exponents, use phrases like "squared" or "cubed." For example, "x²" should be "x squared."
+              "+" should be "plus"
+              "-" should be "minus"
+              "∑" should be "sum"
+              "√" should be "square root"
+              "α" should be "alpha"
+              "β" should be "beta" For powers and exponents, use phrases like "squared" or "cubed." For example, "x²" should be "x squared."
 
-            For fractions, use phrases like "over." For example, "1/2" should be "one over two." For integrals, use "the integral of" followed by the expression. 
+              For fractions, use phrases like "over." For example, "1/2" should be "one over two." For integrals, use "the integral of" followed by the expression. 
+            `: ''}
+
             Avoid any complex formatting that cannot be spoken directly. If an equation is long, break it down into smaller parts. 
             Use commas or pauses in long expressions to make them more natural for speech.
             
