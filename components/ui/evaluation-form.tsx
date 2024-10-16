@@ -311,7 +311,6 @@ export default function EvaluationForm() {
   });
 
   const handleSubmit = async (data: z.infer<typeof surveySchema>) => {
-    console.log(data)
     setIsLoading(true);
     const { error } = await insertEvaluationData(data);
 

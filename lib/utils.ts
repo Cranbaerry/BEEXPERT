@@ -147,31 +147,52 @@ type evaluationFormData = z.infer<typeof surveySchema>;
 export async function insertEvaluationData(values: evaluationFormData) {
   const supabase = createClient();
   const user = await getUserData(supabase, false);
-  if (!user) return { error: "User is not logged in" };
-
-  const insertPromises = Object.entries(values).map(async ([key, value]) => {
-    const answerObject = {
-      type: typeof value,
-      value: value,
-    };
-
-    const { error } = await supabase.from("evaluations").insert({
-      evaluation_id: key,
-      answer: answerObject,
-    });
-    
-    if (error) throw error;
-  });
+  if (!user) return { data: null, error: "User is not logged in" };
 
   try {
+    const insertPromises = Object.entries(values).map(async ([key, value]) => {
+      const answerObject = {
+        type: typeof value,
+        value: value,
+      };
+
+      const { error } = await supabase.from("evaluations").insert({
+        evaluation_id: key,
+        answer: answerObject,
+      });
+
+      if (error) throw error;
+    });
+
+    const { data: profileData, error: profileError } = await supabase
+      .from("profiles")
+      .select("workflow_id")
+      .eq("user_id", user.id)
+      .single();
+    if (profileError) throw profileError;
+
+    const { data: workflowData, error: workflowError } = await supabase
+      .from("workflows")
+      .select("next_workflow_id")
+      .eq("id", profileData.workflow_id)
+      .single();
+    if (workflowError) throw workflowError;
+
+    const { error: updateError } = await supabase
+      .from("profiles")
+      .update({
+        workflow_id: workflowData.next_workflow_id,
+      })
+      .eq("user_id", user.id);
+    if (updateError) throw updateError;
+
     await Promise.all(insertPromises);
+    return { data: { userId: user.id }, error: null };
   } catch (error: unknown) {
     const err = error as PostgrestError;
     return { data: null, error: err.message };
   }
-
-  return { data: { userId: user.id }, error: null };
-};
+}
 
 export async function isNewUser() {
   const supabase = createClient();
