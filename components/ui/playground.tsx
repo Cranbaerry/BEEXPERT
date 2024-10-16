@@ -130,17 +130,18 @@ export default function Playground() {
 
     setWorkflow(workflow);
     // setIsSheetLoaded(false);
-    loadImage(workflow?.image_url)
-      .then((image) => {
-        setQuestionSheetImageSource(image);
-      })
-      .catch(() => {
-        toast.error(
-          'Failed to load question sheet, please refresh and try again..'
-        );
-      }).finally(() => {
-        // setIsSheetLoaded(true);
-      });
+    if (workflow?.image_url)
+      loadImage(workflow?.image_url)
+        .then((image) => {
+          setQuestionSheetImageSource(image);
+        })
+        .catch(() => {
+          toast.error(
+            'Failed to load question sheet, please refresh and try again..'
+          );
+        }).finally(() => {
+          // setIsSheetLoaded(true);
+        });
 
     if (workflow.notify) {
       toast.info(`You are now working on ${workflow?.name}.`);
