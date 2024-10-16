@@ -93,7 +93,7 @@ export default function Playground({ language }: IPlaygroundProps) {
   const [isEmbeddingModelActive, setIsEmbeddingModelActive] =
     useState<boolean>(false);
 
-  const [setIsSheetLoaded] = useState<boolean>(false);
+  // const [setIsSheetLoaded] = useState<boolean>(false);
   const [isMuted, setIsMuted] = useState<boolean>(false);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [isMessagesLoaded, setIsMessagesLoaded] = useState<boolean>(false);
@@ -125,7 +125,7 @@ export default function Playground({ language }: IPlaygroundProps) {
     }
 
     setWorkflow(workflow);
-    setIsSheetLoaded(false);
+    // setIsSheetLoaded(false);
     loadImage(workflow?.image_url)
       .then((image) => {
         setQuestionSheetImageSource(image);
@@ -135,7 +135,7 @@ export default function Playground({ language }: IPlaygroundProps) {
           'Failed to load question sheet, please refresh and try again..'
         );
       }).finally(() => {
-        setIsSheetLoaded(true);
+        // setIsSheetLoaded(true);
       });
 
     if (workflow.notify) {
