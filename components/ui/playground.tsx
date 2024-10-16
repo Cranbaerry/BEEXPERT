@@ -37,16 +37,15 @@ import { createClient } from "@/lib/supabase/client";
 import { RealtimePostgresUpdatePayload } from '@supabase/supabase-js';
 import FlexibleQuestionDialog from "@/components/ui/flexible-question-dialog";
 import EvaluationForm from "./evaluation-form";
+import QuestionnaireForm from "./questionnaire-form";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
+import { getLanguageDetailsById } from "@/lib/utils";
 
 const Canvas = dynamic(() => import("@/components/ui/canvas"), {
   ssr: false,
 });
 
-interface IPlaygroundProps {
-  language: LanguageCode;
-}
-
-export default function Playground({ language }: IPlaygroundProps) {
+export default function Playground() {
   //const [setToolCall] = useState<string>();
   const { messages, append, setMessages } = useChat({
     // onToolCall({ toolCall }) {
@@ -67,6 +66,10 @@ export default function Playground({ language }: IPlaygroundProps) {
       setStatus("Listening");
     },
   });
+
+  const [language, setLanguage] = useState<LanguageCode>("en-US");
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const onChangeLanguage = (language: LanguageCode) => setLanguage(language);
   const [messageBuffer, setMessageBuffer] = useState<string>("");
   const [messageBufferRead, setMessageBufferRead] = useState<string>("");
   const [currentlyPlayingTTSText, setCurrentlyPlayingTTSText] =
@@ -360,6 +363,11 @@ export default function Playground({ language }: IPlaygroundProps) {
     console.log("activeStream changed:", activeStream);
   }, [activeStream]);
 
+  useEffect(() => {
+    const langDetails = getLanguageDetailsById(language);
+    toast.info(`Language switched to ${langDetails?.name}. This change will only impact your conversation with the AI.`);
+  }, [language]);
+
   const handleTTSPlayingStatusChange = useCallback((status: boolean) => {
     const tts = ttsRef.current;
     if (tts)
@@ -436,6 +444,7 @@ export default function Playground({ language }: IPlaygroundProps) {
 
   return (
     <>
+      <QuestionnaireForm />
       {workflow?.id === 4 && <EvaluationForm />}
       {!browserSupportsSpeechRecognition && (
         <AlertDialog defaultOpen={true}>
@@ -515,6 +524,30 @@ export default function Playground({ language }: IPlaygroundProps) {
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
+                <ToggleGroup
+                  id="language-toggle"
+                  type="single"
+                  value={language}
+                  onValueChange={(value) => {
+                    if (value) setLanguage(value)
+                    toast.info(`Bee AI's language changed to ${value}`);
+                  }}
+                  className="border rounded-lg"
+                >
+                  <ToggleGroupItem value="en-US" aria-label="Toggle English">
+                    EN
+                  </ToggleGroupItem>
+                  <ToggleGroupItem value="id-ID" aria-label="Toggle Indonesian">
+                    ID
+                  </ToggleGroupItem>
+                </ToggleGroup>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{isMuted ? "Unmute microphone" : "Mute microphone"}</p>
+              </TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
                 <Button
                   onClick={toggleMicrophone}
                   aria-label={isMuted ? "Mute microphone" : "Unmute microphone"}
@@ -535,7 +568,6 @@ export default function Playground({ language }: IPlaygroundProps) {
           </TooltipProvider>
           <ChatDrawer chatLog={messages} />
           <FlexibleQuestionDialog canvasRef={canvasRef.current} workflow={workflow} />
-          {/* <DialogFinalAnswer canvasRef={canvasRef.current} /> */}
         </div>
       </div>
     </>

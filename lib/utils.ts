@@ -92,29 +92,55 @@ export async function insertQuestionnaireData(values: questionnaireFormData) {
   const user = await getUserData(supabase, false);
   if (!user) return { data: null, error: "User is not logged in" };
 
-  const { error: profileError } = await supabase.from("profiles").insert({
-    full_name: values.fullName,
-    whatsapp_number: values.whatsappNumber,
-    gender: values.gender,
-    profession: values.profession,
-    education_level: values.educationLevel,
-    school: values.school,
-  });
-  if (profileError) return { data: null, error: profileError.message };
+  try {
+    const { data: profileData, error: profileError } = await supabase
+      .from("profiles")
+      .insert({
+        full_name: values.fullName,
+        whatsapp_number: values.whatsappNumber,
+        gender: values.gender,
+        profession: values.profession,
+        education_level: values.educationLevel,
+        school: values.school,
+      })
+      .select("workflow_id")
+      .single();
 
-  const insertData = Object.entries(values).map(([key, value]) => ({
-    question_id: key,
-    answer: {
-      type: typeof value,
-      value: value,
-    },
-  }));
+    if (profileError) throw profileError;
 
-  const { error: insertError } = await supabase.from("questionnaires").insert(insertData);
+    const insertData = Object.entries(values).map(([key, value]) => ({
+      question_id: key,
+      answer: {
+        type: typeof value,
+        value: value,
+      },
+    }));
 
-  if (insertError) return { data: null, error: insertError.message };
+    const { error: insertError } = await supabase.from("questionnaires").insert(insertData);
+    if (insertError) throw insertError;
 
-  return { data: { userId: user.id }, error: null };
+    const { data: workflowData, error: workflowError } = await supabase
+      .from("workflows")
+      .select("next_workflow_id")
+      .eq("id", profileData.workflow_id)
+      .single();
+
+    if (workflowError) throw workflowError;
+
+    const { error: updateError } = await supabase
+      .from("profiles")
+      .update({
+        workflow_id: workflowData.next_workflow_id,
+      })
+      .eq("user_id", user.id ?? "");
+
+    if (updateError) throw updateError;
+
+    return { data: { userId: user.id }, error: null };
+  } catch (error: unknown) {
+    const err = error as PostgrestError;
+    return { data: null, error: err.message };
+  }
 }
 
 type evaluationFormData = z.infer<typeof surveySchema>;
