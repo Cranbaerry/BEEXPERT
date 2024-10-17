@@ -12,11 +12,16 @@ export async function POST(req: Request) {
       .replace(/\bcos\b/gi, "kos")
       .replace(/\bcosinus\b/gi, "kosinus")
       .replace(/α/gi, "alpha")
-      .replace(/β/gi, "beta");
+      .replace(/β/gi, "beta")
+      .replace(/\+/gi, "tambah")
+      .replace(/-/gi, "kurang")
+      .replace(/=/gi, "sama dengan")
+      .replace(/·/gi, "dikali")
 
   if (language === "en-US")
     processedText = text
-      .replace(/·/gi, "times");
+      .replace(/·/gi, "times")
+      .replace(/-/gi, "minus");
 
   // VOICE LIST: https://gist.github.com/BettyJJ/17cbaa1de96235a7f5773b8690a20462
   const langDetails = getLanguageDetailsById(language);
