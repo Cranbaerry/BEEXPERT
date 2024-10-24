@@ -505,7 +505,7 @@ export default function Playground() {
 
   useEffect(() => {
     if (!data) return;
-  
+
     const filteredData = data
       .filter(
         (item): item is RelevantContentItem =>
@@ -515,24 +515,48 @@ export default function Playground() {
           Array.isArray((item as RelevantContentItem).relevantContent)
       )
       .flatMap(item => item.relevantContent);
-  
+
     const newResources: Resource[] = filteredData.map(item => ({
       id: item?.id ?? '',
       title: item?.metadata?.title ?? undefined,
       description: item?.pageContent ?? undefined,
       link: item?.metadata?.url ?? '#',
     }));
-  
+
+
     if (newResources.length === 0) return;
-  
+
     const updatedResources = resources.filter(
       (resource) => !newResources.some((newResource) => newResource.id === resource.id)
     );
-  
+
     const finalizedResources = [...newResources, ...updatedResources];
-    
+    const finalizedResourcesIds = finalizedResources.map(resource => resource.id);
+    const resourcesIds = resources.map(resource => resource.id);
+
     // Prevent state update if finalizedResources is the same as current resources
-    if (!_.isEqual(finalizedResources, resources)) {
+    if (!_.isEqual(finalizedResourcesIds, resourcesIds)) {
+      finalizedResources.map(async resource => {
+        const { title, description, link } = resource;
+        if (title && description) return;
+        const response = await fetch('/api/open-graph', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ url: link }),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          resource.title = data.ogTitle ?? title;
+          resource.description = data.ogDescription ?? (description && description.length > 200 ? description.substring(0, 200) + '...' : description);
+        } else {
+          const url = new URL(link);
+          resource.title = url.hostname;
+          resource.description = description && description.length > 200 ? description.substring(0, 200) + '...' : description
+        }
+      })
 
       console.log('Final resources updated:', finalizedResources);
       setResources(finalizedResources);
@@ -540,7 +564,7 @@ export default function Playground() {
       setData(undefined);
     }
   }, [data, resources, setData]);
-  
+
 
   return (
     <>
