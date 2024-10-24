@@ -7,8 +7,10 @@ import {
   CoreToolMessage,
   AssistantContent,
   ToolContent,
+  StreamData
 } from "ai";
 import { openai } from "@ai-sdk/openai";
+import { createHash } from "crypto";
 import { findRelevantContent } from "@/lib/embeddings";
 import { z } from "zod";
 import { getLanguageDetailsById } from "@/lib/utils";
@@ -60,11 +62,12 @@ async function saveChat(
       const { types, content } = extractMessageContent(message.content);
       return {
         role: message.role,
-        content: content,
+        content,
         image_url: imageUrl,
         language: data.languageId,
         created_at: new Date(),
-        types: types,
+        types,
+        tool_content: types.some(type => type === "tool-result" || type === "tool-call") ? message.content : undefined,
       };
     }),
   ];
@@ -96,9 +99,11 @@ function extractMessageContent(
               }
               return item.text;
             case "tool-result":
-              return `Tool result from ${item.toolName}: ${JSON.stringify(item.result)}`;
+              //return `Tool result from ${item.toolName}: ${JSON.stringify(item.result)}`;
+              return `Tool result from ${item.toolName}`;
             case "tool-call":
-              return `Tool call to ${item.toolName} with args: ${JSON.stringify(item.args)}`;
+              //return `Tool call to ${item.toolName} with args: ${JSON.stringify(item.args)}`;
+              return `Tool call to ${item.toolName}`;
             default:
               return `Unknown content type: ${JSON.stringify(item)}`;
           }
@@ -125,6 +130,7 @@ export async function POST(req: Request) {
   const langDetails = getLanguageDetailsById(data.languageId);
   const language = langDetails?.name ?? "Indonesian";
   const model = process.env.OPENAI_GPT_MODEL ?? "gpt-4o-mini";
+  const additionalStreamData = new StreamData();
 
   const systemPrompt =
     `
@@ -158,21 +164,19 @@ export async function POST(req: Request) {
       Solve one problem at a time. If the user sends multiple problems, solve them one by one.
       Always balance feedback with motivation and appreciation to ensure the user feels supported and encouraged.
       
-      If the users asks a math question, retrieve the relevant information from the knowledge base to provide an explanation or hint.
-      If a response requires information from an additional tool to generate a response, call the appropriate tools in order before responding to the user.
-      
-      Be sure to adhere to any instructions in tool calls ie. if they say to respond like "...", do exactly that.
+      You have a tool called getInformation that you can use to retrieve relevant information from the knowledge base to help the user with their problem.
+      If the users asks a resource or link to help them with the problem, call the appropriate tools in order before responding to the user and retrieve the relevant information from the knowledge base to provide an explanation or hint.
+      You will consider any extra information provided by the tool throughout the conversation.
+      Only call each tools once when the user asks for a resource or link.
+      After resources are retrieved, you do not need to list the urls in your response, the tool and the system will handle that for you, just say to the user "I have found some resources for you, check them out"
+
       If the relevant information is not a direct match to the users prompt, you can be creative in deducing the answer.
       Keep responses short and concise. Answer in a single sentence where possible.
-      If you are unsure, use the getInformation tool and you can use common sense to reason based on the information you do have.
-      Use your abilities as a reasoning machine to answer questions based on the information you do have.
-      You will consider any extra information provided by the tool throughout the conversation.
-      ONLY respond to questions using information from tool calls.
 
-      IMPORTANT: ALWAYS reply to the user in ${language} language no matter what.
+      IMPORTANT: ALWAYS reply to the user in ${language} language no matter what and write the response in paragraph format and as brief as possible.
+      Do not include numbered or bulleted lists in your responses.
     `;
 
-  console.log('systemPrompt', systemPrompt);
   const result = await streamText({
     model: openai(model),
     system: systemPrompt,
@@ -186,7 +190,7 @@ export async function POST(req: Request) {
         ],
       },
     ],
-    maxToolRoundtrips: 3,
+    maxSteps: 3,
     tools: {
       understandQuery: tool({
         description: `Understand the user's query. Use this tool on every prompt.`,
@@ -204,11 +208,10 @@ export async function POST(req: Request) {
             Otherwise, return the query as is.
         
             START CONTEXT BLOCK
-            ${messages.map((message) => `${message.role}: ${message.content}`).join("\n")}
+            ${messages.slice(-10).map((message) => `${message.role}: ${message.content}`).join("\n")}
             END OF CONTEXT BLOCK`
             .trim();
-
-          console.log('prompt', prompt);
+            
           const { object } = await generateObject({
             model: openai(model),
             system: "You are a query understanding assistant. Rewrite the user's query to include any missing context from the conversation.",
@@ -221,22 +224,26 @@ export async function POST(req: Request) {
         },
       }),
       getInformation: tool({
-        description: `Retrieve relevant information from the knowledge base to answer user questions.`,
+        description: `Retrieve relevant information and resources from the knowledge base to help user with their problem.`,
         parameters: z.object({
           rewrittenQuery: z
             .string()
             .describe("The user's query rewritten with context. Be concise."),
         }),
         execute: async ({ rewrittenQuery }) => {
-          const results = await findRelevantContent(rewrittenQuery);
+          const seenUrls = new Set();
+          const results = (await findRelevantContent(rewrittenQuery))
+            .map(result => ({
+              id: createHash('md5').update(result[0].metadata.url).digest('hex'),
+              ...result[0],
+              score: result[1],
+            }))
+            .filter(({ metadata }) => metadata?.url && !seenUrls.has(metadata.url) && seenUrls.add(metadata.url))
 
-          const uniqueResults = Array.from(
-            new Map(
-              results.flat().map((item) => [item?.pageContent, item]),
-            ).values(),
-          );
-
-          return uniqueResults;
+          additionalStreamData.append({
+            relevantContent: results,
+          });
+          return results;
         },
       }),
       // TODO: Remove this tool (testing purpose)
@@ -252,9 +259,10 @@ export async function POST(req: Request) {
       // }),
     },
     onFinish({ responseMessages }) {
+      additionalStreamData.close();
       saveChat(currentMessage, responseMessages, data);
     },
   });
 
-  return result.toDataStreamResponse();
+  return result.toDataStreamResponse({ data: additionalStreamData });
 }

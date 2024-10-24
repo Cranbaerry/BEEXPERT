@@ -19,7 +19,7 @@ import { Badge } from "@/components/ui/badge";
 import { CreateMessage, Message, useChat } from "ai/react";
 import { ChatRequestOptions, JSONValue } from "ai";
 import { toast } from "sonner";
-import { CanvasRef, LanguageCode, Profile, Workflow } from "@/lib/definitions";
+import { CanvasRef, LanguageCode, Profile, Resource, Workflow, RelevantContentItem } from "@/lib/definitions";
 import { useTabActive } from "@/hooks/use-tab-active";
 // import { DialogFinalAnswer } from "./final-answer-dialog";
 import { Icons } from "@/components/ui/icons";
@@ -41,6 +41,8 @@ import QuestionnaireForm from "./questionnaire-form";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { getLanguageDetailsById } from "@/lib/utils";
 import JoyrideSteps from "@/components/ui/joyride-steps";
+import ResourcesDisplay from "@/components/ui/resources-display";
+import _ from 'lodash';
 
 const Canvas = dynamic(() => import("@/components/ui/canvas"), {
   ssr: false,
@@ -48,11 +50,20 @@ const Canvas = dynamic(() => import("@/components/ui/canvas"), {
 
 export default function Playground() {
   //const [setToolCall] = useState<string>();
-  const { messages, append, setMessages } = useChat({
-    // onToolCall({ toolCall }) {
-    //     //setToolCall(toolCall.toolName);
-    //     setStatus(`Thinking`);
-    // },
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { messages, append, setMessages, data, setData } = useChat({
+    onToolCall({ toolCall }) {
+      //setToolCall(toolCall.toolName);
+      switch (toolCall.toolName) {
+        case "getInformation":
+          setStatus("Retrieving relevant information");
+          break;
+        case "understandQuery":
+        default:
+          setStatus("Thinking");
+          break;
+      }
+    },
     onFinish: (message: Message) => {
       if (!/[.!?:]$/.test(message.content)) {
         console.log("onFinish special case:", message.content);
@@ -89,7 +100,7 @@ export default function Playground() {
     useState<HTMLImageElement | null>(null);
   const pauseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [status, setStatus] = useState<
-    "Listening" | "Speak to interrupt" | "Processing" | "Thinking" | "AI Disabled"
+    "Listening" | "Speak to interrupt" | "Processing" | "Thinking" | "AI Disabled" | string
   >("Listening");
   const [activeStream, setActiveStream] = useState<"user" | "bot" | null>(
     null,
@@ -104,6 +115,8 @@ export default function Playground() {
   const supabase = createClient();
   const [workflow, setWorkflow] = useState<Workflow | null>(null);
   const hasUserSpoken = useRef<boolean>(false);
+  const [resources, setResources] = useState<Resource[]>([]);
+  const [newResourcesCount, setNewResourceCount] = useState<number>(0);
   const handleWorkflowChanges = async (payload: RealtimePostgresUpdatePayload<Profile>) => {
     const { new: newProfile } = payload;
 
@@ -146,7 +159,7 @@ export default function Playground() {
 
     if (workflow.notify)
       toast.info(`You are now working on ${workflow?.name}.`);
-    
+
     if (canvasRef.current) {
       canvasRef.current.resetCanvas();
     }
@@ -254,7 +267,6 @@ export default function Playground() {
         const trimmedSentence = sentence.trim();
         if (trimmedSentence && ttsRef.current) {
           console.log("Sentence:", trimmedSentence);
-          // console.log('use_ai:', workflow?.use_ai);
           ttsRef.current.generateTTS(trimmedSentence, language);
         }
       });
@@ -415,6 +427,10 @@ export default function Playground() {
 
   const isTabActive = useTabActive();
 
+  const resetNewResourcesCount = useCallback(() => {
+    setNewResourceCount(0)
+  }, []);
+
   useEffect(() => {
     if (workflow?.use_ai && isTabActive && !isMuted) {
       SpeechRecognition.startListening({
@@ -469,6 +485,61 @@ export default function Playground() {
       }
     };
   }, [stream]);
+
+  useEffect(() => {
+    if (!data) return;
+
+    const filteredData = data
+      .filter(
+        (item): item is RelevantContentItem =>
+          typeof item === 'object' &&
+          item !== null &&
+          'relevantContent' in item &&
+          Array.isArray((item as RelevantContentItem).relevantContent)
+      )
+      .flatMap(item => item.relevantContent);
+
+    const newResources: Resource[] = filteredData.map(item => ({
+      id: item?.id ?? '',
+      title: item?.metadata?.title ?? undefined,
+      description: item?.pageContent ?? undefined,
+      link: item?.metadata?.url ?? '#',
+    }));
+
+    if (newResources.length === 0) return;
+
+    const updatedResources = resources.filter(
+      resource => !newResources.some(newResource => newResource.id === resource.id)
+    );
+
+    const finalizedResources = [...newResources, ...updatedResources];
+    // Prevent state update if finalResources is the same as current resources
+    if (!_.isEqual(finalizedResources, resources)) {
+      const fetchOpenGraphData = async () => {
+        await Promise.all(finalizedResources.map(async resource => {
+          const { title, description, link } = resource;
+          const response = await fetch('/api/open-graph', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ url: link }),
+          });
+  
+          if (response.ok) {
+            const data = await response.json();
+            resource.title = data.ogTitle ?? title;
+            resource.description = data.ogDescription ?? description;
+          }
+        }));
+      }
+  
+      fetchOpenGraphData();
+      setResources(finalizedResources);
+      setNewResourceCount(newResources.length);
+      console.log('Final resources updated:', finalizedResources);
+    }
+  }, [data, resources, newResourcesCount]);
 
   return (
     <>
@@ -597,6 +668,7 @@ export default function Playground() {
           </TooltipProvider>
           <ChatDrawer chatLog={messages} />
           <FlexibleQuestionDialog canvasRef={canvasRef.current} workflow={workflow} />
+          <ResourcesDisplay resources={resources} newResourcesCount={newResourcesCount} resetNewResourceCount={resetNewResourcesCount} />
         </div>
       </div>
       <JoyrideSteps />

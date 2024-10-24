@@ -85,3 +85,20 @@ export type QuestionInput = {
   correctAnswer?: string
   essayInputs?: EssayInput[]
 }
+
+export interface Resource {
+  id: string
+  title: string | undefined
+  description: string | undefined
+  link: string
+}
+
+export type RelevantContentItem = {
+  relevantContent?: {
+    score: number;
+    pageContent: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    metadata: Record<string, any>;
+    id: string;
+  }[];
+};

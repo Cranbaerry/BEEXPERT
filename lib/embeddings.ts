@@ -20,11 +20,14 @@ const supabaseClient = createClient(
 
 export const vectorStore = new SupabaseVectorStore(embeddings, {
   client: supabaseClient,
-  tableName: "documents_bge",
-  queryName: "match_documents_bgev2",
+  tableName: "documents_bge_openweb",
+  queryName: "match_documents_bge_openweb",
 });
 
 export const findRelevantContent = async (userQuery: string) => {
-  const similarGuides = await vectorStore.similaritySearch(userQuery, 5);
+  const similarGuides = await vectorStore.similaritySearchWithScore(userQuery, 5);
   return similarGuides;
+
+  // DocumentInterface<Record<string, any>>[]
+  // [DocumentInterface<Record<string, any>>, number]
 };
