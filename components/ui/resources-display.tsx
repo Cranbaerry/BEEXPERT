@@ -88,7 +88,7 @@ export default function Component({ resources: propResources, newResourcesCount,
                             <span className="sr-only">Close</span>
                         </Button>
                     </CardHeader>
-                    <ScrollArea className="flex-grow px-4">
+                    <ScrollArea className="flex-grow px-4 mb-4">
                         <div className="space-y-3 py-2">
                             {resources.map((resource, index) => (
                                 <Card key={index} className="p-3">

@@ -43,7 +43,7 @@ import { getLanguageDetailsById } from "@/lib/utils";
 import JoyrideSteps from "@/components/ui/joyride-steps";
 import ResourcesDisplay from "@/components/ui/resources-display";
 import _ from 'lodash';
-
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 const Canvas = dynamic(() => import("@/components/ui/canvas"), {
   ssr: false,
 });
@@ -65,10 +65,11 @@ export default function Playground() {
       }
     },
     onFinish: (message: Message) => {
-      if (!/[.!?:]$/.test(message.content)) {
-        console.log("onFinish special case:", message.content);
-        setMessageBuffer(message.content);
-      }
+      console.log("Finalized message:", message);
+      // if (!/[.!?:]$/.test(message.content)) {
+      //   console.log("onFinish special case:", message.content);
+      //   setMessageBuffer(message.content);
+      // }
     },
     onError: (error: Error) => {
       console.error("Error:", error);
@@ -82,7 +83,6 @@ export default function Playground() {
   const [language, setLanguage] = useState<LanguageCode>("en-US");
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const onChangeLanguage = (language: LanguageCode) => setLanguage(language);
-  const [messageBuffer, setMessageBuffer] = useState<string>("");
   const [messageBufferRead, setMessageBufferRead] = useState<string>("");
   const [currentlyPlayingTTSText, setCurrentlyPlayingTTSText] =
     useState<string>("");
@@ -249,29 +249,24 @@ export default function Playground() {
         const latestMessage = messages[messages.length - 1];
         const content = latestMessage.content;
         if (latestMessage?.role === "assistant") {
-          if (content && /[.!?:]$/.test(content)) {
-            setMessageBuffer(content);
+          if (content && /[.!?]$/.test(content)) {
+            //setMessageBuffer(content);
+            const currentMessage = content.replace(messageBufferRead, "");
+            const sentences = currentMessage.match(/[^.!?]+[.!?]+/g) || [];
+            setMessageBufferRead(content);
+
+            sentences.forEach((sentence) => {
+              const trimmedSentence = sentence.trim();
+              if (trimmedSentence && ttsRef.current) {
+                console.log("Sentence:", trimmedSentence);
+                ttsRef.current.generateTTS(trimmedSentence, language);
+              }
+            });
           }
         }
       }
     }
-  }, [messages, isMessagesLoaded, workflow]);
-
-  useEffect(() => {
-    if (workflow?.use_ai && messageBuffer.length > 0) {
-      const currentMessage = messageBuffer.replace(messageBufferRead, "");
-      const sentences = currentMessage.match(/[^.!?]+[.!?]+/g) || [];
-      setMessageBufferRead(messageBuffer);
-
-      sentences.forEach((sentence) => {
-        const trimmedSentence = sentence.trim();
-        if (trimmedSentence && ttsRef.current) {
-          console.log("Sentence:", trimmedSentence);
-          ttsRef.current.generateTTS(trimmedSentence, language);
-        }
-      });
-    }
-  }, [messageBuffer, messageBufferRead, language, workflow]);
+  }, [messages, isMessagesLoaded, workflow, language, messageBufferRead]);
 
   useEffect(() => {
     const fetchInitialWorkflow = async () => {
@@ -519,32 +514,12 @@ export default function Playground() {
     if (newResources.length === 0) return;
 
     const updatedResources = resources.filter(
-      resource => !newResources.some(newResource => newResource.id === resource.id)
+      (resource) => !newResources.some((newResource) => newResource.id === resource.id)
     );
 
     const finalizedResources = [...newResources, ...updatedResources];
     // Prevent state update if finalResources is the same as current resources
     if (!_.isEqual(finalizedResources, resources)) {
-      const fetchOpenGraphData = async () => {
-        await Promise.all(finalizedResources.map(async resource => {
-          const { title, description, link } = resource;
-          const response = await fetch('/api/open-graph', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ url: link }),
-          });
-  
-          if (response.ok) {
-            const data = await response.json();
-            resource.title = data.ogTitle ?? title;
-            resource.description = data.ogDescription ?? description;
-          }
-        }));
-      }
-  
-      fetchOpenGraphData();
       setResources(finalizedResources);
       setNewResourceCount(newResources.length);
       console.log('Final resources updated:', finalizedResources);
@@ -589,13 +564,15 @@ export default function Playground() {
           </AlertDialogContent>
         </AlertDialog>
       )}
-
       <AlertDialog open={!isEmbeddingModelActive}>
         <AlertDialogContent className="max-w-md">
           <AlertDialogHeader>
+            <AlertDialogTitle>
+              <VisuallyHidden>Loading</VisuallyHidden>
+            </AlertDialogTitle>
             <AlertDialogDescription className="flex flex-col items-center space-y-4">
-              <Icons.spinner className="h-14 w-14 animate-spin" />
-              <p>Please wait while we set things up in the background...</p>
+              <Icons.spinner className="h-14 w-14 animate-spin mb-2" />
+              Please wait while we set things up in the background...
             </AlertDialogDescription>
           </AlertDialogHeader>
         </AlertDialogContent>

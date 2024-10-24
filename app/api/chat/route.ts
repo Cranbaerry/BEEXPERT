@@ -121,8 +121,9 @@ function extractMessageContent(
   return { types: ["unknown"], content: JSON.stringify(content) };
 }
 
-
 export async function POST(req: Request) {
+  const supabase = createClient();
+  const user = await getUserData(supabase);
   const { messages, data }: { messages: Message[]; data: Metadata } =
     await req.json();
   const initialMessages: Message[] = messages.slice(0, -1);
@@ -131,6 +132,7 @@ export async function POST(req: Request) {
   const language = langDetails?.name ?? "Indonesian";
   const model = process.env.OPENAI_GPT_MODEL ?? "gpt-4o-mini";
   const additionalStreamData = new StreamData();
+  if (!user) throw new Error("User is not logged in");
 
   const systemPrompt =
     `
@@ -174,7 +176,8 @@ export async function POST(req: Request) {
       Keep responses short and concise. Answer in a single sentence where possible.
 
       IMPORTANT: ALWAYS reply to the user in ${language} language no matter what and write the response in paragraph format and as brief as possible.
-      Do not include numbered or bulleted lists in your responses.
+      Do not include numbered or bulleted lists in your responses. 
+      Every sentence in the paragraph ends with one of the punctuation marks (., !, ?)
     `;
 
   const result = await streamText({
@@ -211,7 +214,7 @@ export async function POST(req: Request) {
             ${messages.slice(-10).map((message) => `${message.role}: ${message.content}`).join("\n")}
             END OF CONTEXT BLOCK`
             .trim();
-            
+
           const { object } = await generateObject({
             model: openai(model),
             system: "You are a query understanding assistant. Rewrite the user's query to include any missing context from the conversation.",
@@ -234,8 +237,8 @@ export async function POST(req: Request) {
           const seenUrls = new Set();
           const results = (await findRelevantContent(rewrittenQuery))
             .map(result => ({
-              id: createHash('md5').update(result[0].metadata.url).digest('hex'),
               ...result[0],
+              id: createHash('md5').update(result[0].metadata.url).digest('hex'),
               score: result[1],
             }))
             .filter(({ metadata }) => metadata?.url && !seenUrls.has(metadata.url) && seenUrls.add(metadata.url))
