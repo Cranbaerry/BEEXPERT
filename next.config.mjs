@@ -3,6 +3,7 @@ const nextConfig = {
   // experimental: {
   //   taint: true,
   // },
+  reactStrictMode: false,
   experimental: {
     serverActions: {
       allowedOrigins: [

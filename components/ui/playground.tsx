@@ -65,11 +65,23 @@ export default function Playground() {
       }
     },
     onFinish: (message: Message) => {
-      console.log("Finalized message:", message);
-      // if (!/[.!?:]$/.test(message.content)) {
-      //   console.log("onFinish special case:", message.content);
-      //   setMessageBuffer(message.content);
-      // }
+      console.log("onFinish:", message);
+      if (message.role === "assistant" && message.content.length === 0) {
+        console.log("onFinish special case:", message);
+        setStatus("Listening");
+
+        const getInformationFlag = message.toolInvocations?.some(
+          (invocation) => invocation.toolName === "getInformation"
+        );
+
+        if (getInformationFlag && ttsRef.current) {
+          const ttsMessages: Record<LanguageCode, string> = {
+            "en-US": "I have retrieved relevant information for you.",
+            "id-ID": "Saya sudah selesai mencari informasi yang relevan untuk Anda.",
+          };
+          ttsRef.current.generateTTS(ttsMessages[language], language);
+        }
+      }
     },
     onError: (error: Error) => {
       console.error("Error:", error);
@@ -493,7 +505,7 @@ export default function Playground() {
 
   useEffect(() => {
     if (!data) return;
-
+  
     const filteredData = data
       .filter(
         (item): item is RelevantContentItem =>
@@ -503,28 +515,32 @@ export default function Playground() {
           Array.isArray((item as RelevantContentItem).relevantContent)
       )
       .flatMap(item => item.relevantContent);
-
+  
     const newResources: Resource[] = filteredData.map(item => ({
       id: item?.id ?? '',
       title: item?.metadata?.title ?? undefined,
       description: item?.pageContent ?? undefined,
       link: item?.metadata?.url ?? '#',
     }));
-
+  
     if (newResources.length === 0) return;
-
+  
     const updatedResources = resources.filter(
       (resource) => !newResources.some((newResource) => newResource.id === resource.id)
     );
-
+  
     const finalizedResources = [...newResources, ...updatedResources];
-    // Prevent state update if finalResources is the same as current resources
+    
+    // Prevent state update if finalizedResources is the same as current resources
     if (!_.isEqual(finalizedResources, resources)) {
-      setResources(finalizedResources);
-      setNewResourceCount(newResources.length);
+
       console.log('Final resources updated:', finalizedResources);
+      setResources(finalizedResources);
+      setNewResourceCount(finalizedResources.length - resources.length);
+      setData(undefined);
     }
-  }, [data, resources, newResourcesCount]);
+  }, [data, resources, setData]);
+  
 
   return (
     <>

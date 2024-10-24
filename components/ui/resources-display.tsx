@@ -33,30 +33,30 @@ export default function Component({ resources: propResources, newResourcesCount,
         }
     }, [isOpen, resetNewResourceCount, newResourcesCount])
 
-    useEffect(() => {
-        if (!resources || resources.length === 0) return;
-        resources.map(async resource => {
-            const { title, description, link } = resource;
-            if (title && description) return;
-            const response = await fetch('/api/open-graph', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ url: link }),
-            });
+    // useEffect(() => {
+    //     if (!resources || resources.length === 0) return;
+    //     resources.map(async resource => {
+    //         const { title, description, link } = resource;
+    //         if (title && description) return;
+    //         const response = await fetch('/api/open-graph', {
+    //             method: 'POST',
+    //             headers: {
+    //                 'Content-Type': 'application/json',
+    //             },
+    //             body: JSON.stringify({ url: link }),
+    //         });
 
-            if (response.ok) {
-                const data = await response.json();
-                resource.title = data.ogTitle ?? title;
-                resource.description = data.ogDescription ?? (description && description.length > 200 ? description.substring(0, 200) + '...' : description);
-            } else {
-                const url = new URL(link);
-                resource.title = url.hostname;
-                resource.description = description && description.length > 200 ? description.substring(0, 200) + '...' : description
-            }
-        })
-    }, [resources])
+    //         if (response.ok) {
+    //             const data = await response.json();
+    //             resource.title = data.ogTitle ?? title;
+    //             resource.description = data.ogDescription ?? (description && description.length > 200 ? description.substring(0, 200) + '...' : description);
+    //         } else {
+    //             const url = new URL(link);
+    //             resource.title = url.hostname;
+    //             resource.description = description && description.length > 200 ? description.substring(0, 200) + '...' : description
+    //         }
+    //     })
+    // }, [resources])
 
     return (
         <div className="fixed right-8 top-28 flex items-end">
