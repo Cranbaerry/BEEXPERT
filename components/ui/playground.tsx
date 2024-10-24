@@ -360,6 +360,16 @@ export default function Playground() {
       setIsMessagesLoaded(true);
     };
 
+    setResources([
+      {
+        id: "1",
+        title: "Trigonometric Identities - Sine and Cosine Addition Formulas",
+        description:
+          "Comprehensive overview of trigonometric identities, focusing on the sine and cosine addition formulas. It covers basic trigonometric concepts, such as defining sine, cosine, and tangent in relation to the sides of a right triangle. Additionally, it includes a trigonometry table for standard angles (30°, 45°, 60°, and 90°) and tips for remembering trigonometric values. The core of the document is dedicated to explaining and demonstrating the sine and cosine addition formulas, with examples illustrating their use in solving trigonometric expressions",
+        link: "/resources/Trigonometric Identities_Sine and Cosine Addition Formulas.pdf",
+      },
+    ]);
+    setNewResourceCount(1);
     fetchInitialWorkflow();
     handleEmbeddingModelLoad();
     handleMessagesLoad();
