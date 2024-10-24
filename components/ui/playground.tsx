@@ -42,7 +42,6 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { getLanguageDetailsById } from "@/lib/utils";
 import JoyrideSteps from "@/components/ui/joyride-steps";
 import ResourcesDisplay from "@/components/ui/resources-display";
-import _ from 'lodash';
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 const Canvas = dynamic(() => import("@/components/ui/canvas"), {
   ssr: false,
@@ -535,7 +534,7 @@ export default function Playground() {
     const resourcesIds = resources.map(resource => resource.id);
 
     // Prevent state update if finalizedResources is the same as current resources
-    if (!_.isEqual(finalizedResourcesIds, resourcesIds)) {
+    if (JSON.stringify(finalizedResourcesIds) !== JSON.stringify(resourcesIds)) {
       finalizedResources.map(async resource => {
         const { title, description, link } = resource;
         if (title && description) return;
