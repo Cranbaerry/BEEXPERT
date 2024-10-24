@@ -170,7 +170,7 @@ export async function POST(req: Request) {
       If the users asks a resource or link to help them with the problem, call the appropriate tools in order before responding to the user and retrieve the relevant information from the knowledge base to provide an explanation or hint.
       You will consider any extra information provided by the tool throughout the conversation.
       Only call each tools once when the user asks for a resource or link.
-      After resources are retrieved, you do not need to list the urls in your response, the tool and the system will handle that for you, just say to the user "I have found some resources for you, check them out"
+      After resources are retrieved, you do not need to list the urls in your response, the tool and the system will handle that for you, instead, please respond back to the user with something like "I have found some resources for you, check them out"
 
       If the relevant information is not a direct match to the users prompt, you can be creative in deducing the answer.
       Keep responses short and concise. Answer in a single sentence where possible.
