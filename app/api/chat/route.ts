@@ -7,7 +7,7 @@ import {
   CoreToolMessage,
   AssistantContent,
   ToolContent,
-  StreamData
+  StreamData,
 } from "ai";
 import { openai } from "@ai-sdk/openai";
 import { createHash } from "crypto";
@@ -67,7 +67,11 @@ async function saveChat(
         language: data.languageId,
         created_at: new Date(),
         types,
-        tool_content: types.some(type => type === "tool-result" || type === "tool-call") ? message.content : undefined,
+        tool_content: types.some(
+          (type) => type === "tool-result" || type === "tool-call",
+        )
+          ? message.content
+          : undefined,
       };
     }),
   ];
@@ -134,28 +138,31 @@ export async function POST(req: Request) {
   const additionalStreamData = new StreamData();
   if (!user) throw new Error("User is not logged in");
 
-  const systemPrompt =
-    `
+  const systemPrompt = `
       You are a helpful and encouraging math tutor.
 
       Users will interact with you by sending images of their handwritten solutions on a digital canvas so you technically see the image. Guide the user through the problem-solving process by offering helpful hints, explanations, motivation, and encouragement.
 
       Do NOT provide the final solution, and ensure your responses are simple, clear, and easy to understand. Keep your replies free from special formatting. Offer words of motivation such as "You are on the right track!" and "Great effort, keep going!" Encourage persistence with phrases like "Your hard work is paying off!" or "You’re almost there, keep it up!" Provide appreciation such as "Thank you for trying, your determination is impressive" or "Your solution is correct because you never gave up!"
 
-      ${data.languageId === 'id-ID' ? `
+      ${
+        data.languageId === "id-ID"
+          ? `
         IMPORTANT: FOLLOW THESE GUIDELINES TO ENSURE YOUR RESPONSES ARE EASY TO BE READ BY THE TEXT-TO-SPEECH (TTS) ENGINE:
         Use words instead of symbols. For example:
 
-        "+" should be "plus"
-        "-" should be "minus"
-        "∑" should be "sum"
-        "√" should be "square root"
+        "+" should be "tambah"
+        "-" should be "kurang"
+        "∑" should be "total"
+        "√" should be "akar"
         "α" should be "alpha"
         "β" should be "beta" For powers and exponents, use phrases like "squared" or "cubed." For example, "x²" should be "x squared."
 
         For fractions, use phrases like "over." For example, "1/2" should be "one over two." For integrals, use "the integral of" followed by the expression. 
         Avoid any complex formatting that cannot be spoken directly. 
-      `: ''}
+      `
+          : ""
+      }
 
       If you see sinα, please add spaces between sin and α. For example, "sin α" instead of "sinα".
 
@@ -212,15 +219,20 @@ export async function POST(req: Request) {
             Otherwise, return the query as is.
         
             START CONTEXT BLOCK
-            ${messages.slice(-10).map((message) => `${message.role}: ${message.content}`).join("\n")}
-            END OF CONTEXT BLOCK`
-            .trim();
+            ${messages
+              .slice(-10)
+              .map((message) => `${message.role}: ${message.content}`)
+              .join("\n")}
+            END OF CONTEXT BLOCK`.trim();
 
           const { object } = await generateObject({
             model: openai(model),
-            system: "You are a query understanding assistant. Rewrite the user's query to include any missing context from the conversation.",
+            system:
+              "You are a query understanding assistant. Rewrite the user's query to include any missing context from the conversation.",
             schema: z.object({
-              rewrittenQuery: z.string().describe("The rewritten user query with context."),
+              rewrittenQuery: z
+                .string()
+                .describe("The rewritten user query with context."),
             }),
             prompt: prompt,
           });
@@ -237,12 +249,19 @@ export async function POST(req: Request) {
         execute: async ({ rewrittenQuery }) => {
           const seenUrls = new Set();
           const results = (await findRelevantContent(rewrittenQuery))
-            .map(result => ({
+            .map((result) => ({
               ...result[0],
-              id: createHash('md5').update(result[0].metadata.url).digest('hex'),
+              id: createHash("md5")
+                .update(result[0].metadata.url)
+                .digest("hex"),
               score: result[1],
             }))
-            .filter(({ metadata }) => metadata?.url && !seenUrls.has(metadata.url) && seenUrls.add(metadata.url))
+            .filter(
+              ({ metadata }) =>
+                metadata?.url &&
+                !seenUrls.has(metadata.url) &&
+                seenUrls.add(metadata.url),
+            );
 
           additionalStreamData.append({
             relevantContent: results,
