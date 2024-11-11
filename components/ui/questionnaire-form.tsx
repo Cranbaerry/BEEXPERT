@@ -20,7 +20,7 @@ import PersetujuanSection, {
   agreements,
 } from "./questionnaire-section-agreement";
 import DataDiriSection from "./questionnaire-section-user";
-import PertanyaanUmumSection from "./questionnaire-section-general";
+// import PertanyaanUmumSection from "./questionnaire-section-general";
 
 export const formSchema = z.object({
   agreements: z
@@ -29,52 +29,56 @@ export const formSchema = z.object({
       message: "Please agree to all the given terms and conditions.",
     }),
   fullName: z.string().min(1, { message: "Please enter your full name." }),
-  whatsappNumber: z.string().optional(),
+  // whatsappNumber: z.string().optional(),
   gender: z.enum(["male", "female"], {
     required_error: "Please select your gender.",
   }),
-  profession: z.string().min(1, { message: "Choose a profession from the available options." }),
-  educationLevel: z
+  profession: z
     .string()
-    .min(1, { message: "Select one of the educational level options." }),
-  school: z.string().min(1, { message: "Please fill in the school/institution." }),
+    .min(1, { message: "Choose a profession from the available options." }),
+  // educationLevel: z
+  //   .string()
+  //   .min(1, { message: "Select one of the educational level options." }),
+  school: z
+    .string()
+    .min(1, { message: "Please fill in the school/institution." }),
 
-  question1: z.enum(["yes", "no"], {
-    required_error: "Please select one option.",
-  }),
-  question2: z.enum(
-    ["lack_understanding", "limited_understanding", "moderate_understanding", "extensive_understanding"],
-    {
-      required_error: "Please select one option.",
-    },
-  ),
-  question3: z.enum(["yes", "no"], {
-    required_error: "Please select one option.",
-  }),
-  question4: z.enum(["yes", "no"], {
-    required_error: "Please select one option.",
-  }),
-  question5: z.array(z.string()).refine((value) => value.some((item) => item), {
-    message: "Please select at least one of the options above.",
-  }),
-  question6: z.array(z.string()).refine((value) => value.some((item) => item), {
-    message: "Please select at least one of the options above.",
-  }),
-  question7: z.array(z.string()).refine((value) => value.some((item) => item), {
-    message: "Please select at least one of the options above.",
-  }),
-  question8: z.enum(["agree", "maybe", "disagree"], {
-    required_error: "Please select one option.",
-  }),
-  question9: z.array(z.string()).refine((value) => value.some((item) => item), {
-    message: "Please select at least one of the options above.",
-  }),
+  // question1: z.enum(["yes", "no"], {
+  //   required_error: "Please select one option.",
+  // }),
+  // question2: z.enum(
+  //   ["lack_understanding", "limited_understanding", "moderate_understanding", "extensive_understanding"],
+  //   {
+  //     required_error: "Please select one option.",
+  //   },
+  // ),
+  // question3: z.enum(["yes", "no"], {
+  //   required_error: "Please select one option.",
+  // }),
+  // question4: z.enum(["yes", "no"], {
+  //   required_error: "Please select one option.",
+  // }),
+  // question5: z.array(z.string()).refine((value) => value.some((item) => item), {
+  //   message: "Please select at least one of the options above.",
+  // }),
+  // question6: z.array(z.string()).refine((value) => value.some((item) => item), {
+  //   message: "Please select at least one of the options above.",
+  // }),
+  // question7: z.array(z.string()).refine((value) => value.some((item) => item), {
+  //   message: "Please select at least one of the options above.",
+  // }),
+  // question8: z.enum(["agree", "maybe", "disagree"], {
+  //   required_error: "Please select one option.",
+  // }),
+  // question9: z.array(z.string()).refine((value) => value.some((item) => item), {
+  //   message: "Please select at least one of the options above.",
+  // }),
 });
 
 const sections = [
   { component: PersetujuanSection, class: "sm:max-w-[500px]" },
   { component: DataDiriSection, class: "sm:max-w-[500px]" },
-  { component: PertanyaanUmumSection, class: "sm:max-w-[500px]" },
+  // { component: PertanyaanUmumSection, class: "sm:max-w-[500px]" },
 ];
 
 export default function QuestionnaireForm() {
@@ -86,17 +90,17 @@ export default function QuestionnaireForm() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       fullName: "",
-      whatsappNumber: "",
+      // whatsappNumber: "",
       agreements: [],
-      question1: undefined,
-      question2: undefined,
-      question3: undefined,
-      question5: [],
-      question6: [],
-      question7: [],
-      question9: [],
+      // question1: undefined,
+      // question2: undefined,
+      // question3: undefined,
+      // question5: [],
+      // question6: [],
+      // question7: [],
+      // question9: [],
       school: "",
-      educationLevel: "",
+      // educationLevel: "",
       profession: "",
     },
   });

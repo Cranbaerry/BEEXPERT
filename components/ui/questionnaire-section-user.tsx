@@ -33,7 +33,7 @@ export default function DataDiriSection() {
       }
     };
     fetchData();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -69,7 +69,7 @@ export default function DataDiriSection() {
         />
 
         {/* WhatsApp Number */}
-        <FormField
+        {/* <FormField
           control={form.control}
           name="whatsappNumber"
           render={({ field }) => {
@@ -83,7 +83,7 @@ export default function DataDiriSection() {
               </FormItem>
             );
           }}
-        />
+        /> */}
 
         {/* Gender */}
         <FormField
@@ -142,9 +142,7 @@ export default function DataDiriSection() {
                   </FormControl>
                   <SelectContent>
                     <SelectItem value="student">Student</SelectItem>
-                    <SelectItem value="teacher">
-                      Teacher
-                    </SelectItem>
+                    <SelectItem value="teacher">Teacher</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -154,7 +152,7 @@ export default function DataDiriSection() {
         />
 
         {/* Education Level */}
-        <FormField
+        {/* <FormField
           control={form.control}
           name="educationLevel"
           render={({ field }) => {
@@ -197,7 +195,7 @@ export default function DataDiriSection() {
               </FormItem>
             );
           }}
-        />
+        /> */}
 
         {/* School */}
         <FormField
