@@ -1,6 +1,5 @@
 import { Stage, Layer, Line, Rect } from "react-konva";
 import React, { useEffect, useRef, useState, useImperativeHandle } from "react";
-import { KonvaEventObject } from "konva/lib/Node";
 import { CanvasProps, LineData } from "@/lib/definitions";
 import Konva from "konva";
 import { Card } from "@/components/ui/card";
@@ -31,6 +30,7 @@ import {
 import { ColorPicker } from "@/components/ui/color-picker";
 import { Image as KonvaImage } from "react-konva";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { KonvaEventObject } from "konva/lib/Node";
 
 function Canvas(props: CanvasProps) {
   const stageParentRef = useRef<HTMLDivElement>(null);
@@ -56,6 +56,10 @@ function Canvas(props: CanvasProps) {
     handleExport: () => handleExport(),
     getDimensions: () => dimensions,
     resetCanvas: () => resetCanvas(),
+    handleTouchMoveFromParent: (e: TouchEvent) => handleTouchMoveFromParent(e),
+    handleTouchStartFromParent: (e: TouchEvent) =>
+      handleTouchStartFromParent(e),
+    handleTouchEndFromParent: (e: TouchEvent) => handleTouchEndFromParent(e),
   }));
 
   const handleUndo = () => {
@@ -88,58 +92,6 @@ function Canvas(props: CanvasProps) {
       return uri;
     }
     return "";
-  };
-
-  const handleMouseDown = (e: KonvaEventObject<MouseEvent>) => {
-    if (tool === "drag") return;
-    if (showPlaceholder) setShowPlaceholder(false);
-    isDrawing.current = true;
-    const stage = e.target.getStage();
-    const pos = stage?.getPointerPosition();
-    if (!pos || !stage) return;
-
-    const adjustedPos = {
-      x: (pos.x - stage.x()) / scale,
-      y: (pos.y - stage.y()) / scale,
-    };
-
-    setLines((prevLines) => [
-      ...prevLines,
-      {
-        tool,
-        points: [adjustedPos.x, adjustedPos.y],
-        color: colorRef.current,
-        size: strokeWidth,
-      },
-    ]);
-  };
-
-  const handleMouseMove = (e: KonvaEventObject<MouseEvent>) => {
-    if (tool === "drag") return;
-    if (!isDrawing.current) return;
-    const stage = e.target.getStage();
-    const pos = stage?.getPointerPosition();
-    if (!pos || !stage) return;
-
-    const adjustedPos = {
-      x: (pos.x - stage.x()) / scale,
-      y: (pos.y - stage.y()) / scale,
-    };
-
-    setLines((prevLines) => {
-      const lastLine = prevLines[prevLines.length - 1];
-      lastLine.points = lastLine.points.concat([adjustedPos.x, adjustedPos.y]);
-      const newLines = [...prevLines.slice(0, -1), lastLine];
-      return newLines;
-    });
-  };
-
-  const handleMouseUp = () => {
-    if (tool === "drag") return;
-    isDrawing.current = false;
-    const newHistory = history.slice(0, historyStep + 1);
-    setHistory([...newHistory, lines]);
-    setHistoryStep(newHistory.length);
   };
 
   const handleResize = () => {
@@ -181,6 +133,176 @@ function Canvas(props: CanvasProps) {
       default:
         return "default";
     }
+  };
+
+  // Common drawing function for mouse and touch events
+  const startDrawing = (position: { x: number; y: number }) => {
+    if (tool === "drag") return;
+    if (showPlaceholder) setShowPlaceholder(false);
+    isDrawing.current = true;
+
+    // Create an initial history entry if none exists
+    if (historyStep === -1) {
+      setHistory([[]]); // Store the initial empty state in history
+      setHistoryStep(0);
+    }
+
+    setLines((prevLines) => [
+      ...prevLines,
+      {
+        tool,
+        points: [position.x, position.y],
+        color: colorRef.current,
+        size: strokeWidth,
+      },
+    ]);
+  };
+
+  const draw = (position: { x: number; y: number }) => {
+    if (tool === "drag" || !isDrawing.current) return;
+
+    setLines((prevLines) => {
+      const lastLine = prevLines[prevLines.length - 1];
+      lastLine.points = lastLine.points.concat([position.x, position.y]);
+      const newLines = [...prevLines.slice(0, -1), lastLine];
+      return newLines;
+    });
+  };
+
+  const stopDrawing = () => {
+    if (tool === "drag") return;
+    isDrawing.current = false;
+    const newHistory = history.slice(0, historyStep + 1);
+    setHistory([...newHistory, lines]);
+    setHistoryStep(newHistory.length);
+  };
+
+  const handleMouseDown = (e: KonvaEventObject<MouseEvent>) => {
+    const stage = e.target.getStage();
+    const pos = stage?.getPointerPosition();
+    if (!pos || !stage) return;
+
+    const adjustedPos = {
+      x: (pos.x - stage.x()) / scale,
+      y: (pos.y - stage.y()) / scale,
+    };
+
+    startDrawing(adjustedPos);
+  };
+
+  const handleMouseMove = (e: KonvaEventObject<MouseEvent>) => {
+    const stage = e.target.getStage();
+    const pos = stage?.getPointerPosition();
+    if (!pos || !stage) return;
+
+    const adjustedPos = {
+      x: (pos.x - stage.x()) / scale,
+      y: (pos.y - stage.y()) / scale,
+    };
+
+    draw(adjustedPos);
+  };
+
+  const handleMouseUp = () => {
+    stopDrawing();
+  };
+
+  const handleTouchStart = (e: KonvaEventObject<TouchEvent>) => {
+    e.evt.preventDefault();
+    e.evt.stopPropagation();
+
+    const stage = e.target.getStage();
+    if (!stage) return;
+
+    const touch = e.evt.touches[0];
+    const boundingRect = stage.container().getBoundingClientRect();
+
+    const adjustedPos = {
+      x: (touch.clientX - boundingRect.left) / scale,
+      y: (touch.clientY - boundingRect.top) / scale,
+    };
+
+    startDrawing(adjustedPos);
+  };
+
+  const handleTouchMove = (e: KonvaEventObject<TouchEvent>) => {
+    e.evt.stopPropagation();
+    e.evt.preventDefault();
+
+    const stage = e.target.getStage();
+
+    if (!stage || !isDrawing.current) return;
+
+    const touch = e.evt.touches[0];
+    const boundingRect = stage.container().getBoundingClientRect();
+
+    const adjustedPos = {
+      x: (touch.clientX - boundingRect.left) / scale,
+      y: (touch.clientY - boundingRect.top) / scale,
+    };
+
+    draw(adjustedPos);
+  };
+
+  const handleTouchEnd = () => {
+    stopDrawing();
+  };
+
+  const handleTouchStartFromParent = (e: TouchEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+
+    if (!stageRef.current) return;
+
+    const stage = stageRef.current.getStage();
+    const konvaEvent = {
+      evt: e,
+      target: stage,
+      currentTarget: stage,
+      type: "touchstart",
+      pointerId: e.touches[0].identifier,
+    } as unknown as Konva.KonvaEventObject<TouchEvent>;
+
+    // Forward the event to handleTouchStart
+    handleTouchStart(konvaEvent);
+  };
+
+  const handleTouchMoveFromParent = (e: TouchEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+
+    if (!stageRef.current) return;
+
+    const stage = stageRef.current.getStage();
+    const konvaEvent = {
+      evt: e,
+      target: stage,
+      currentTarget: stage,
+      type: "touchmove",
+      pointerId: e.touches[0].identifier,
+    } as unknown as Konva.KonvaEventObject<TouchEvent>;
+
+    // Forward the event to handleTouchMove
+    handleTouchMove(konvaEvent);
+  };
+
+  const handleTouchEndFromParent = (e: TouchEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+
+    if (!stageRef.current) return;
+
+    const stage = stageRef.current.getStage();
+    const konvaEvent = {
+      evt: e,
+      target: stage,
+      currentTarget: stage,
+      type: "touchend",
+      pointerId: e.changedTouches[0].identifier,
+    } as unknown as Konva.KonvaEventObject<TouchEvent>;
+
+    // Forward the event to handleTouchEnd
+    handleTouchEnd(konvaEvent);
   };
 
   function TooltipWrapper({
@@ -271,7 +393,10 @@ function Canvas(props: CanvasProps) {
                 </TooltipWrapper>
                 <PopoverContent className="w-64">
                   <div className="flex flex-col space-y-2">
-                    <label htmlFor="stroke-width" className="text-sm font-medium">
+                    <label
+                      htmlFor="stroke-width"
+                      className="text-sm font-medium"
+                    >
                       Stroke Width: {strokeWidth}px
                     </label>
                     <Slider
@@ -351,6 +476,9 @@ function Canvas(props: CanvasProps) {
                 onMouseDown={handleMouseDown}
                 onMouseMove={handleMouseMove}
                 onMouseUp={handleMouseUp}
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
               >
                 <Layer>
                   <Rect
@@ -369,10 +497,10 @@ function Canvas(props: CanvasProps) {
                       height={(dimensions.height * 0.75) / scale}
                       width={
                         props.questionsSheetImageSource instanceof
-                          HTMLImageElement
+                        HTMLImageElement
                           ? (props.questionsSheetImageSource.width *
-                            ((dimensions.height * 0.75) / scale)) /
-                          props.questionsSheetImageSource.height
+                              ((dimensions.height * 0.75) / scale)) /
+                            props.questionsSheetImageSource.height
                           : undefined // Fallback in case it's not an HTMLImageElement
                       }
                       scaleX={scale}
