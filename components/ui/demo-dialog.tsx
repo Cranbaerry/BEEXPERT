@@ -18,18 +18,20 @@ function DialogDemo() {
       </DialogTrigger>
       <DialogContent className="sm:max-w-[610px]">
         <DialogHeader>
-          <DialogTitle>Demo Video</DialogTitle>
+          <DialogTitle>Demonstration</DialogTitle>
           <DialogDescription>
-            Check out this video to see how BEEXPERT is used.
+            Check out this video to see how BEEXPERT is used. This demonstration
+            will guide you through the main features and functionalities of our
+            platform. If you have further questions, do not hesitate to ask our
+            team. 😊👍
           </DialogDescription>
         </DialogHeader>
-        <div className="grid gap-4 py-4">
+        <div className="grid gap-4">
           <iframe
             width="560"
             height="315"
-            src="https://www.youtube.com/embed/93LG3ryrZWE?si=XhR5c7e5VaNOOPJo"
+            src="https://www.youtube.com/embed/93LG3ryrZWE?si=XhR5c7e5VaNOOPJo?autoplay=1"
             title="YouTube video player"
-            frameBorder="0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
             referrerPolicy="strict-origin-when-cross-origin"
             allowFullScreen
@@ -37,7 +39,7 @@ function DialogDemo() {
         </div>
         <DialogFooter>
           <Button>
-            <DialogClose>Finish</DialogClose>
+            <DialogClose>Okay, I got it!</DialogClose>
           </Button>
         </DialogFooter>
       </DialogContent>

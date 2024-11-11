@@ -632,23 +632,20 @@ export default function Playground() {
     <>
       <QuestionnaireForm />
       {workflow?.id === 4 && <EvaluationForm />}
-      {!browserSupportsSpeechRecognition && (
-        <AlertDialog defaultOpen={true}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Browser not supported</AlertDialogTitle>
-              <AlertDialogDescription>
-                Your browser doesn&apos;t support speech recognition. For a
-                smooth experience, please try using the latest version of Google
-                Chrome or Microsoft Edge.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogAction>Got it!</AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      )}
+
+      <AlertDialog open={!browserSupportsSpeechRecognition}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Browser not supported 😔💔</AlertDialogTitle>
+            <AlertDialogDescription>
+              Unfortunately, your browser does not support speech recognition,
+              which is essential for our app to function correctly. For the best
+              experience, please use the latest version of Google Chrome or
+              Microsoft Edge.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {!isMicrophoneAvailable && (
         <AlertDialog defaultOpen={true}>
@@ -666,6 +663,7 @@ export default function Playground() {
           </AlertDialogContent>
         </AlertDialog>
       )}
+
       <AlertDialog open={!isEmbeddingModelActive}>
         <AlertDialogContent className="max-w-md">
           <AlertDialogHeader>
