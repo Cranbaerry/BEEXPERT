@@ -12,6 +12,7 @@ import {
   ZoomInIcon,
   ZoomOutIcon,
   LineHeightIcon,
+  ReloadIcon,
 } from "@radix-ui/react-icons";
 import {
   Tooltip,
@@ -282,7 +283,6 @@ function Canvas(props: CanvasProps) {
       pointerId: e.touches[0].identifier,
     } as unknown as Konva.KonvaEventObject<TouchEvent>;
 
-    // Forward the event to handleTouchMove
     handleTouchMove(konvaEvent);
   };
 
@@ -291,10 +291,12 @@ function Canvas(props: CanvasProps) {
     e.preventDefault();
 
     if (!stageRef.current) return;
-
-    // Forward the event to handleTouchEnd
     handleTouchEnd();
   };
+
+  // useEffect(() => {
+  //   toast.info(`Zoom level changed to ${Math.round(scale * 100)}%.`)
+  // }, [scale]);
 
   function TooltipWrapper({
     content,
@@ -350,17 +352,6 @@ function Canvas(props: CanvasProps) {
                 </Button>
               </TooltipWrapper>
               <Separator className="my-2" />
-              {/* <TooltipWrapper content="Reset">
-                <Button
-                  onClick={resetCanvas}
-                  size="icon"
-                  variant="ghost"
-                  className="tool__reset w-full"
-                >
-                  <TrashIcon className="h-4 w-4" />
-                </Button>
-              </TooltipWrapper>
-              <Separator className="my-2" /> */}
               <TooltipWrapper content="Color">
                 <div className="tool__color flex justify-center">
                   <ColorPicker
@@ -422,6 +413,16 @@ function Canvas(props: CanvasProps) {
                   className="tool__redo w-full"
                 >
                   <ArrowRightIcon className="h-4 w-4" />
+                </Button>
+              </TooltipWrapper>
+              <TooltipWrapper content="Clear Canvas">
+                <Button
+                  onClick={resetCanvas}
+                  size="icon"
+                  variant="ghost"
+                  className="tool__reset w-full"
+                >
+                  <ReloadIcon className="h-4 w-4" />
                 </Button>
               </TooltipWrapper>
               <Separator className="my-2" />
