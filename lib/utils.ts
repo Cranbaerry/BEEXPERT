@@ -97,10 +97,10 @@ export async function insertQuestionnaireData(values: questionnaireFormData) {
       .from("profiles")
       .insert({
         full_name: values.fullName,
-        whatsapp_number: values.whatsappNumber,
+        // whatsapp_number: values.whatsappNumber,
         gender: values.gender,
         profession: values.profession,
-        education_level: values.educationLevel,
+        // education_level: values.educationLevel,
         school: values.school,
       })
       .select("workflow_id")
@@ -116,7 +116,9 @@ export async function insertQuestionnaireData(values: questionnaireFormData) {
       },
     }));
 
-    const { error: insertError } = await supabase.from("questionnaires").insert(insertData);
+    const { error: insertError } = await supabase
+      .from("questionnaires")
+      .insert(insertData);
     if (insertError) throw insertError;
 
     const { data: workflowData, error: workflowError } = await supabase
