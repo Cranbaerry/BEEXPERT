@@ -19,7 +19,14 @@ import { Badge } from "@/components/ui/badge";
 import { CreateMessage, Message, useChat } from "ai/react";
 import { ChatRequestOptions, JSONValue } from "ai";
 import { toast } from "sonner";
-import { CanvasRef, LanguageCode, Profile, Resource, Workflow, RelevantContentItem } from "@/lib/definitions";
+import {
+  CanvasRef,
+  LanguageCode,
+  Profile,
+  Resource,
+  Workflow,
+  RelevantContentItem,
+} from "@/lib/definitions";
 import { useTabActive } from "@/hooks/use-tab-active";
 // import { DialogFinalAnswer } from "./final-answer-dialog";
 import { Icons } from "@/components/ui/icons";
@@ -34,11 +41,11 @@ import {
 import ChatDrawer from "@/components/ui/chat-drawer";
 import { getUserData } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
-import { RealtimePostgresUpdatePayload } from '@supabase/supabase-js';
+import { RealtimePostgresUpdatePayload } from "@supabase/supabase-js";
 import FlexibleQuestionDialog from "@/components/ui/flexible-question-dialog";
 import EvaluationForm from "./evaluation-form";
 import QuestionnaireForm from "./questionnaire-form";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { getLanguageDetailsById } from "@/lib/utils";
 import JoyrideSteps from "@/components/ui/joyride-steps";
 import ResourcesDisplay from "@/components/ui/resources-display";
@@ -70,13 +77,14 @@ export default function Playground() {
         setStatus("Listening");
 
         const getInformationFlag = message.toolInvocations?.some(
-          (invocation) => invocation.toolName === "getInformation"
+          (invocation) => invocation.toolName === "getInformation",
         );
 
         if (getInformationFlag && ttsRef.current) {
           const ttsMessages: Record<LanguageCode, string> = {
             "en-US": "I have retrieved relevant information for you.",
-            "id-ID": "Saya sudah selesai mencari informasi yang relevan untuk Anda.",
+            "id-ID":
+              "Saya sudah selesai mencari informasi yang relevan untuk Anda.",
           };
           ttsRef.current.generateTTS(ttsMessages[language], language);
         }
@@ -111,11 +119,14 @@ export default function Playground() {
     useState<HTMLImageElement | null>(null);
   const pauseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [status, setStatus] = useState<
-    "Listening" | "Speak to interrupt" | "Processing" | "Thinking" | "AI Disabled" | string
+    | "Listening"
+    | "Speak to interrupt"
+    | "Processing"
+    | "Thinking"
+    | "AI Disabled"
+    | string
   >("Listening");
-  const [activeStream, setActiveStream] = useState<"user" | "bot" | null>(
-    null,
-  );
+  const [activeStream, setActiveStream] = useState<"user" | "bot" | null>(null);
   const [isEmbeddingModelActive, setIsEmbeddingModelActive] =
     useState<boolean>(false);
 
@@ -128,7 +139,10 @@ export default function Playground() {
   const hasUserSpoken = useRef<boolean>(false);
   const [resources, setResources] = useState<Resource[]>([]);
   const [newResourcesCount, setNewResourceCount] = useState<number>(0);
-  const handleWorkflowChanges = async (payload: RealtimePostgresUpdatePayload<Profile>) => {
+  const bottomFixedDivRef = useRef<HTMLDivElement>(null);
+  const handleWorkflowChanges = async (
+    payload: RealtimePostgresUpdatePayload<Profile>,
+  ) => {
     const { new: newProfile } = payload;
 
     if (newProfile) {
@@ -140,55 +154,59 @@ export default function Playground() {
     }
   };
 
-  const loadWorkflowSetup = useCallback(async (workflowId: number) => {
-    const { data, error } = await supabase
-      .from('workflows')
-      .select('*')
-      .eq('id', workflowId)
-      .single();
+  const loadWorkflowSetup = useCallback(
+    async (workflowId: number) => {
+      const { data, error } = await supabase
+        .from("workflows")
+        .select("*")
+        .eq("id", workflowId)
+        .single();
 
-    const workflow = data as Workflow;
-    if (error) {
-      toast.error('Failed to fetch workflow, please refresh and try again.');
-      return;
-    }
+      const workflow = data as Workflow;
+      if (error) {
+        toast.error("Failed to fetch workflow, please refresh and try again.");
+        return;
+      }
 
-    setWorkflow(workflow);
-    // setIsSheetLoaded(false);
-    if (workflow?.image_url)
-      loadImage(workflow?.image_url)
-        .then((image) => {
-          setQuestionSheetImageSource(image);
-        })
-        .catch(() => {
-          toast.error(
-            'Failed to load question sheet, please refresh and try again..'
-          );
-        }).finally(() => {
-          // setIsSheetLoaded(true);
-        });
+      setWorkflow(workflow);
+      // setIsSheetLoaded(false);
+      if (workflow?.image_url)
+        loadImage(workflow?.image_url)
+          .then((image) => {
+            setQuestionSheetImageSource(image);
+          })
+          .catch(() => {
+            toast.error(
+              "Failed to load question sheet, please refresh and try again..",
+            );
+          })
+          .finally(() => {
+            // setIsSheetLoaded(true);
+          });
 
-    if (workflow.notify)
-      toast.info(`You are now working on ${workflow?.name}.`);
+      if (workflow.notify)
+        toast.info(`You are now working on ${workflow?.name}.`);
 
-    if (canvasRef.current) {
-      canvasRef.current.resetCanvas();
-    }
-  }, [supabase]);
+      if (canvasRef.current) {
+        canvasRef.current.resetCanvas();
+      }
+    },
+    [supabase],
+  );
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const channel = supabase
-    .channel('profiles-changes-pg')
+    .channel("profiles-changes-pg")
     .on(
-      'postgres_changes',
+      "postgres_changes",
       {
-        event: 'UPDATE',
-        schema: 'public',
-        table: 'profiles',
+        event: "UPDATE",
+        schema: "public",
+        table: "profiles",
       },
-      handleWorkflowChanges
+      handleWorkflowChanges,
     )
-    .subscribe()
+    .subscribe();
 
   const {
     transcript,
@@ -212,7 +230,7 @@ export default function Playground() {
     const sendTranscript = () => {
       if (!workflow?.use_ai) {
         toast.info("AI is disabled for this assessment.");
-        return
+        return;
       }
       if (finalTranscript.trim() !== "") {
         setStatus("Processing");
@@ -283,18 +301,18 @@ export default function Playground() {
     const fetchInitialWorkflow = async () => {
       const user = await getUserData(supabase);
       if (!user) {
-        console.error('User is not logged in');
+        console.error("User is not logged in");
         return;
       }
 
       const { data: dbProfile, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('user_id', user.id)
+        .from("profiles")
+        .select("*")
+        .eq("user_id", user.id)
         .single();
 
       if (error) {
-        console.error('Error fetching profile:', error);
+        console.error("Error fetching profile:", error);
         return;
       }
 
@@ -407,25 +425,29 @@ export default function Playground() {
 
   useEffect(() => {
     const langDetails = getLanguageDetailsById(language);
-    toast.info(`Language switched to ${langDetails?.name}. This change will only impact your conversation with the AI.`);
+    toast.info(
+      `Language switched to ${langDetails?.name}. This change will only impact your conversation with the AI.`,
+    );
   }, [language]);
 
-  const handleTTSPlayingStatusChange = useCallback((status: boolean) => {
-    const tts = ttsRef.current;
-    if (tts)
-      console.log(
-        "ttsStatus: %s, queue count: %d",
-        status,
-        tts?.getTTSQueueCount(),
-      );
+  const handleTTSPlayingStatusChange = useCallback(
+    (status: boolean) => {
+      const tts = ttsRef.current;
+      if (tts)
+        console.log(
+          "ttsStatus: %s, queue count: %d",
+          status,
+          tts?.getTTSQueueCount(),
+        );
 
-    if (!workflow?.use_ai) {
-      setActiveStream(null);
-    } else if (status) {
-      setActiveStream("bot");
-    }
-
-  }, [workflow?.use_ai]);
+      if (!workflow?.use_ai) {
+        setActiveStream(null);
+      } else if (status) {
+        setActiveStream("bot");
+      }
+    },
+    [workflow?.use_ai],
+  );
 
   useEffect(() => {
     if (workflow?.use_ai) {
@@ -444,7 +466,7 @@ export default function Playground() {
   const isTabActive = useTabActive();
 
   const resetNewResourcesCount = useCallback(() => {
-    setNewResourceCount(0)
+    setNewResourceCount(0);
   }, []);
 
   useEffect(() => {
@@ -508,40 +530,44 @@ export default function Playground() {
     const filteredData = data
       .filter(
         (item): item is RelevantContentItem =>
-          typeof item === 'object' &&
+          typeof item === "object" &&
           item !== null &&
-          'relevantContent' in item &&
-          Array.isArray((item as RelevantContentItem).relevantContent)
+          "relevantContent" in item &&
+          Array.isArray((item as RelevantContentItem).relevantContent),
       )
-      .flatMap(item => item.relevantContent);
+      .flatMap((item) => item.relevantContent);
 
-    const newResources: Resource[] = filteredData.map(item => ({
-      id: item?.id ?? '',
+    const newResources: Resource[] = filteredData.map((item) => ({
+      id: item?.id ?? "",
       title: item?.metadata?.title ?? undefined,
       description: item?.pageContent ?? undefined,
-      link: item?.metadata?.url ?? '#',
+      link: item?.metadata?.url ?? "#",
     }));
-
 
     if (newResources.length === 0) return;
 
     const updatedResources = resources.filter(
-      (resource) => !newResources.some((newResource) => newResource.id === resource.id)
+      (resource) =>
+        !newResources.some((newResource) => newResource.id === resource.id),
     );
 
     const finalizedResources = [...newResources, ...updatedResources];
-    const finalizedResourcesIds = finalizedResources.map(resource => resource.id);
-    const resourcesIds = resources.map(resource => resource.id);
+    const finalizedResourcesIds = finalizedResources.map(
+      (resource) => resource.id,
+    );
+    const resourcesIds = resources.map((resource) => resource.id);
 
     // Prevent state update if finalizedResources is the same as current resources
-    if (JSON.stringify(finalizedResourcesIds) !== JSON.stringify(resourcesIds)) {
-      finalizedResources.map(async resource => {
+    if (
+      JSON.stringify(finalizedResourcesIds) !== JSON.stringify(resourcesIds)
+    ) {
+      finalizedResources.map(async (resource) => {
         const { title, description, link } = resource;
         if (title && description) return;
-        const response = await fetch('/api/open-graph', {
-          method: 'POST',
+        const response = await fetch("/api/open-graph", {
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
           body: JSON.stringify({ url: link }),
         });
@@ -549,21 +575,58 @@ export default function Playground() {
         if (response.ok) {
           const data = await response.json();
           resource.title = data.ogTitle ?? title;
-          resource.description = data.ogDescription ?? (description && description.length > 200 ? description.substring(0, 200) + '...' : description);
+          resource.description =
+            data.ogDescription ??
+            (description && description.length > 200
+              ? description.substring(0, 200) + "..."
+              : description);
         } else {
           const url = new URL(link);
           resource.title = url.hostname;
-          resource.description = description && description.length > 200 ? description.substring(0, 200) + '...' : description
+          resource.description =
+            description && description.length > 200
+              ? description.substring(0, 200) + "..."
+              : description;
         }
-      })
+      });
 
-      console.log('Final resources updated:', finalizedResources);
+      console.log("Final resources updated:", finalizedResources);
       setResources(finalizedResources);
       setNewResourceCount(finalizedResources.length - resources.length);
       setData(undefined);
     }
   }, [data, resources, setData]);
 
+  useEffect(() => {
+    // Prevents scrolling while drawing
+    const handleTouchStart = (event: TouchEvent): void =>
+      canvasRef.current?.handleTouchStartFromParent(event);
+    const handleTouchMove = (event: TouchEvent): void =>
+      canvasRef.current?.handleTouchMoveFromParent(event);
+    const handleTouchEnd = (event: TouchEvent): void =>
+      canvasRef.current?.handleTouchEndFromParent(event);
+
+    const targetDiv = bottomFixedDivRef.current;
+    if (targetDiv) {
+      targetDiv.addEventListener("touchstart", handleTouchStart, {
+        passive: false,
+      });
+      targetDiv.addEventListener("touchmove", handleTouchMove, {
+        passive: false,
+      });
+      targetDiv.addEventListener("touchend", handleTouchEnd, {
+        passive: false,
+      });
+    }
+
+    return () => {
+      if (targetDiv) {
+        targetDiv.removeEventListener("touchmove", handleTouchMove);
+        targetDiv.removeEventListener("touchstart", handleTouchStart);
+        targetDiv.removeEventListener("touchend", handleTouchEnd);
+      }
+    };
+  }, []);
 
   return (
     <>
@@ -624,7 +687,8 @@ export default function Playground() {
       />
       <div
         className="fixed bottom-8 left-24 flex items-end space-x-2"
-        style={{ width: "calc(100% - 8rem)" }}
+        style={{ width: "calc(100% - 8rem)", overflow: "hidden" }}
+        ref={bottomFixedDivRef}
       >
         <div className="flex items-center">
           <TTS
@@ -655,7 +719,7 @@ export default function Playground() {
                   type="single"
                   value={language}
                   onValueChange={(value) => {
-                    if (value) setLanguage(value)
+                    if (value) setLanguage(value);
                     toast.info(`Bee AI's language changed to ${value}`);
                   }}
                   className="border rounded-lg"
@@ -693,8 +757,15 @@ export default function Playground() {
             </Tooltip>
           </TooltipProvider>
           <ChatDrawer chatLog={messages} />
-          <FlexibleQuestionDialog canvasRef={canvasRef.current} workflow={workflow} />
-          <ResourcesDisplay resources={resources} newResourcesCount={newResourcesCount} resetNewResourceCount={resetNewResourcesCount} />
+          <FlexibleQuestionDialog
+            canvasRef={canvasRef.current}
+            workflow={workflow}
+          />
+          <ResourcesDisplay
+            resources={resources}
+            newResourcesCount={newResourcesCount}
+            resetNewResourceCount={resetNewResourcesCount}
+          />
         </div>
       </div>
       <JoyrideSteps />

@@ -8,12 +8,10 @@ export type CanvasRef = {
   handleExport: () => string;
   getDimensions: () => { width: number; height: number };
   resetCanvas: () => void;
+  handleTouchStartFromParent: (e: TouchEvent) => void;
+  handleTouchMoveFromParent: (e: TouchEvent) => void;
+  handleTouchEndFromParent: (e: TouchEvent) => void;
 };
-
-// export type CanvasWrapperProps = {
-//   backgroundColor: string;
-//   ref: any;
-// }
 
 export type LineData = {
   tool: string;
@@ -69,28 +67,28 @@ export type RealtimePostgresUpdatePayload<T> = {
 };
 
 export type Option = {
-  id: string
-  text: string
-}
+  id: string;
+  text: string;
+};
 
 export type EssayInput = {
-  id: string
-  label: string
-  type: "short" | "long"
-}
+  id: string;
+  label: string;
+  type: "short" | "long";
+};
 
 export type QuestionInput = {
-  type: "multiple-choice" | "essay"
-  options?: Option[]
-  correctAnswer?: string
-  essayInputs?: EssayInput[]
-}
+  type: "multiple-choice" | "essay";
+  options?: Option[];
+  correctAnswer?: string;
+  essayInputs?: EssayInput[];
+};
 
 export interface Resource {
-  id: string
-  title: string | undefined
-  description: string | undefined
-  link: string
+  id: string;
+  title: string | undefined;
+  description: string | undefined;
+  link: string;
 }
 
 export type RelevantContentItem = {
