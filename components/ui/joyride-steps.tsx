@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { CallBackProps, STATUS, Step } from "react-joyride";
 import dynamic from "next/dynamic";
 import { createClient } from "@/lib/supabase/client";
@@ -213,10 +213,10 @@ const JoyrideSteps = () => {
     },
   ]);
 
-  const resetJoyride = () => {
+  const resetJoyride = useCallback(() => {
     setIsActive(true);
     setKey((prevKey) => prevKey + 1);
-  };
+  }, [setIsActive]);
 
   const handleJoyrideCallback = (data: CallBackProps) => {
     const { status } = data;
@@ -253,7 +253,7 @@ const JoyrideSteps = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [setIsActive]);
+  }, [setIsActive, resetJoyride]);
 
   return (
     <Joyride

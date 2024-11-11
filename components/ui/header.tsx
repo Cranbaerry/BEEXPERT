@@ -14,7 +14,7 @@ interface HeaderProps {
   isFixed: boolean;
 }
 
-export default function Header({ isFixed }: HeaderProps) {
+const Header: React.FC<HeaderProps> = ({ isFixed }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
 
   const NavItems = () => (
@@ -69,7 +69,7 @@ export default function Header({ isFixed }: HeaderProps) {
               <span className="sr-only">Toggle Menu</span>
             </Button>
           </SheetTrigger>
-          <SheetContent side="right">
+          <SheetContent side="right" className="w-[200px]">
             <nav className="flex flex-col space-y-4">
               <NavItems />
             </nav>
@@ -83,7 +83,7 @@ export default function Header({ isFixed }: HeaderProps) {
       </div>
     </header>
   );
-}
+};
 
 Header.displayName = "Header";
 export { Header };
