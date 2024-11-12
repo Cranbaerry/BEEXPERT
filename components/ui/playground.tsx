@@ -141,6 +141,7 @@ export default function Playground() {
   const [newResourcesCount, setNewResourceCount] = useState<number>(0);
   const bottomFixedDivRef = useRef<HTMLDivElement>(null);
   const width = canvasRef.current?.getDimensions()?.width ?? 0;
+  const height = canvasRef.current?.getDimensions()?.height ?? 0;
   const handleWorkflowChanges = async (
     payload: RealtimePostgresUpdatePayload<Profile>,
   ) => {
@@ -610,7 +611,7 @@ export default function Playground() {
       <QuestionnaireForm />
       {workflow?.id === 4 && <EvaluationForm />}
 
-      {isEmbeddingModelActive && width < 500 && (
+      {isEmbeddingModelActive && (width < 500 || height < 500) && (
         <>
           <AlertDialog defaultOpen={true}>
             <AlertDialogContent>
@@ -619,7 +620,7 @@ export default function Playground() {
                 <AlertDialogDescription>
                   For the best experience, please use a device with a larger
                   screen. Optionally, you can rotate your device to landscape
-                  mode for a better view. We apologize for the inconvenience.
+                  mode for a better view.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
