@@ -43,7 +43,6 @@ import { getUserData } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
 import { RealtimePostgresUpdatePayload } from "@supabase/supabase-js";
 import FlexibleQuestionDialog from "@/components/ui/flexible-question-dialog";
-import EvaluationForm from "./evaluation-form";
 import QuestionnaireForm from "./questionnaire-form";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { getLanguageDetailsById } from "@/lib/utils";
@@ -142,19 +141,6 @@ export default function Playground() {
   const bottomFixedDivRef = useRef<HTMLDivElement>(null);
   const width = canvasRef.current?.getDimensions()?.width ?? 0;
   const height = canvasRef.current?.getDimensions()?.height ?? 0;
-  const handleWorkflowChanges = async (
-    payload: RealtimePostgresUpdatePayload<Profile>,
-  ) => {
-    const { new: newProfile } = payload;
-
-    if (newProfile) {
-      const { workflow_id } = newProfile;
-
-      if (workflow_id) {
-        loadWorkflowSetup(workflow_id);
-      }
-    }
-  };
 
   const loadWorkflowSetup = useCallback(
     async (workflowId: number) => {
@@ -195,20 +181,6 @@ export default function Playground() {
     },
     [supabase],
   );
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const channel = supabase
-    .channel("profiles-changes-pg")
-    .on(
-      "postgres_changes",
-      {
-        event: "UPDATE",
-        schema: "public",
-        table: "profiles",
-      },
-      handleWorkflowChanges,
-    )
-    .subscribe();
 
   const {
     transcript,
@@ -462,6 +434,42 @@ export default function Playground() {
     }
   }, [workflow?.use_ai, setActiveStream]);
 
+  const handleWorkflowChanges = useCallback(
+    async (payload: RealtimePostgresUpdatePayload<Profile>) => {
+      console.log("Profile changes:", payload);
+      const { new: newProfile } = payload;
+
+      if (newProfile) {
+        const { workflow_id } = newProfile;
+
+        if (workflow_id) {
+          loadWorkflowSetup(workflow_id);
+        }
+      }
+    },
+    [loadWorkflowSetup],
+  );
+
+  useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const channel = supabase
+      .channel("profiles-changes-playground")
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "profiles",
+        },
+        handleWorkflowChanges,
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [loadWorkflowSetup, handleWorkflowChanges, supabase]);
+
   const handleTTSOnReadingTextChange = useCallback((text: string) => {
     setCurrentlyPlayingTTSText(text.trim());
   }, []);
@@ -609,7 +617,7 @@ export default function Playground() {
   return (
     <>
       <QuestionnaireForm />
-      {workflow?.id === 4 && <EvaluationForm />}
+      {/* {workflow?.id === 4 && <EvaluationForm />} */}
 
       {isEmbeddingModelActive && (width < 500 || height < 500) && (
         <>

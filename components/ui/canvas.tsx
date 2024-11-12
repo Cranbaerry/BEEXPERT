@@ -351,13 +351,13 @@ function Canvas(props: CanvasProps) {
         event.preventDefault();
         handleRedo();
       } else if (event.key === "h") {
-        event.preventDefault();
+        //event.preventDefault();
         setTool("drag");
       } else if (event.key === "p") {
-        event.preventDefault();
+        //event.preventDefault();
         setTool("pencil");
       } else if (event.key === "e") {
-        event.preventDefault();
+        //event.preventDefault();
         setTool("eraser");
       } else if (
         (event.ctrlKey || event.metaKey) &&
@@ -375,7 +375,6 @@ function Canvas(props: CanvasProps) {
         event.stopPropagation();
         resetCanvas();
       }
-      console.log(event.key);
     };
 
     window.addEventListener("keydown", handleShortcuts);
