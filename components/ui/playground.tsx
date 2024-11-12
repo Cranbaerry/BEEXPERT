@@ -703,7 +703,7 @@ export default function Playground() {
             onReadingTextChange={handleTTSOnReadingTextChange}
             onFinishedTalking={handleTTSFinishedTalking}
           />
-          <Badge className="mx-2 whitespace-nowrap">{status}</Badge>
+          <Badge className="bot__status mx-2 whitespace-nowrap">{status}</Badge>
         </div>
 
         <div className="flex-auto w-full self-center">
@@ -727,7 +727,7 @@ export default function Playground() {
                     if (value) setLanguage(value);
                     toast.info(`Bee AI's language changed to ${value}`);
                   }}
-                  className="border rounded-lg"
+                  className="switch__lang border rounded-lg"
                 >
                   <ToggleGroupItem value="en-US" aria-label="Toggle English">
                     EN

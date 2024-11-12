@@ -27,32 +27,21 @@ const JoyrideSteps = () => {
       target: "body",
       title: <div className="font-bold">Explore BEEXPERT features!</div>,
     },
-    {
-      content: (
-        <span className="text-sm">
-          You can switch the communication language with BEEXPERT to English by
-          pressing the following button.
-        </span>
-      ),
-      placement: "bottom",
-      target: ".switch__lang",
-      title: <div className="font-bold">Change Language</div>,
-    },
-    {
-      content: (
-        <span className="text-sm">
-          View a brief video demonstration to learn how BEEXPERT works.
-        </span>
-      ),
-      placement: "bottom",
-      styles: {
-        options: {
-          width: 300,
-        },
-      },
-      target: ".demo__project",
-      title: <div className="font-bold">Demo Video</div>,
-    },
+    // {
+    //   content: (
+    //     <span className="text-sm">
+    //       View a brief video demonstration to learn how BEEXPERT works.
+    //     </span>
+    //   ),
+    //   placement: "bottom",
+    //   styles: {
+    //     options: {
+    //       width: 300,
+    //     },
+    //   },
+    //   target: ".demo__project",
+    //   title: <div className="font-bold">Demo Video</div>,
+    // },
     {
       content: (
         <span className="text-sm">
@@ -141,6 +130,19 @@ const JoyrideSteps = () => {
     },
     {
       content: (
+        <span className="text-sm">Clear the canvas to start over.</span>
+      ),
+      placement: "right",
+      styles: {
+        options: {
+          width: 300,
+        },
+      },
+      target: ".tool__reset",
+      title: <div className="font-bold">Tool: Clear</div>,
+    },
+    {
+      content: (
         <span className="text-sm">
           Select the following option to enlarge the canvas.
         </span>
@@ -168,6 +170,31 @@ const JoyrideSteps = () => {
       },
       target: ".tool__zoom_out",
       title: <div className="font-bold">Tool: Zoom Out</div>,
+    },
+    {
+      content: (
+        <span className="text-sm">
+          The following text indicates the current state of BEEXPERT&apos;s AI.
+        </span>
+      ),
+      placement: "top",
+      styles: {
+        options: {
+          width: 300,
+        },
+      },
+      target: ".bot__status",
+      title: <div className="font-bold">AI status</div>,
+    },
+    {
+      content: (
+        <span className="text-sm">
+          You can switch the communication language with BEEXPERT to English or Indonesia here.
+        </span>
+      ),
+      placement: "bottom",
+      target: ".switch__lang",
+      title: <div className="font-bold">Change Language</div>,
     },
     {
       content: (

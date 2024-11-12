@@ -19,7 +19,7 @@ const Header: React.FC<HeaderProps> = ({ isFixed }) => {
 
   const NavItems = () => (
     <>
-      <div className="demo__project text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
+      <div className="start__tour text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
         <TourNavigation />
       </div>
       <div className="demo__project text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
