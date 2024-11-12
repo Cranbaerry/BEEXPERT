@@ -1,5 +1,11 @@
 import { Stage, Layer, Line, Rect } from "react-konva";
-import React, { useEffect, useRef, useState, useImperativeHandle } from "react";
+import React, {
+  useEffect,
+  useRef,
+  useState,
+  useImperativeHandle,
+  useCallback,
+} from "react";
 import { CanvasProps, LineData } from "@/lib/definitions";
 import Konva from "konva";
 import { Card } from "@/components/ui/card";
@@ -66,21 +72,21 @@ function Canvas(props: CanvasProps) {
     handleTouchEndFromParent: (e: TouchEvent) => handleTouchEndFromParent(e),
   }));
 
-  const handleUndo = () => {
+  const handleUndo = useCallback(() => {
     if (historyStep > 0) {
       const newStep = historyStep - 1;
       setLines(JSON.parse(JSON.stringify(history[newStep])));
       setHistoryStep(newStep);
     }
-  };
+  }, [history, historyStep]);
 
-  const handleRedo = () => {
+  const handleRedo = useCallback(() => {
     if (historyStep < history.length - 1) {
       const newStep = historyStep + 1;
       setLines(JSON.parse(JSON.stringify(history[newStep])));
       setHistoryStep(newStep);
     }
-  };
+  }, [history, historyStep]);
 
   const handleZoomIn = () => {
     setScale((prevScale) => Math.min(prevScale + 0.1, 3));
@@ -336,9 +342,47 @@ function Canvas(props: CanvasProps) {
     );
   };
 
-  // useEffect(() => {
-  //   toast.info(`Zoom level changed to ${Math.round(scale * 100)}%.`)
-  // }, [scale]);
+  useEffect(() => {
+    const handleShortcuts = (event: KeyboardEvent) => {
+      if ((event.ctrlKey || event.metaKey) && event.key === "z") {
+        event.preventDefault();
+        handleUndo();
+      } else if ((event.ctrlKey || event.metaKey) && event.key === "y") {
+        event.preventDefault();
+        handleRedo();
+      } else if (event.key === "h") {
+        event.preventDefault();
+        setTool("drag");
+      } else if (event.key === "p") {
+        event.preventDefault();
+        setTool("pencil");
+      } else if (event.key === "e") {
+        event.preventDefault();
+        setTool("eraser");
+      } else if (
+        (event.ctrlKey || event.metaKey) &&
+        (event.key === "=" || event.key === "+")
+      ) {
+        event.preventDefault();
+        event.stopPropagation();
+        handleZoomIn();
+      } else if ((event.ctrlKey || event.metaKey) && event.key === "-") {
+        event.preventDefault();
+        event.stopPropagation();
+        handleZoomOut();
+      } else if ((event.ctrlKey || event.metaKey) && event.key === "r") {
+        event.preventDefault();
+        event.stopPropagation();
+        resetCanvas();
+      }
+      console.log(event.key);
+    };
+
+    window.addEventListener("keydown", handleShortcuts);
+    return () => {
+      window.removeEventListener("keydown", handleShortcuts);
+    };
+  }, [handleRedo, handleUndo]);
 
   function TooltipWrapper({
     content,
@@ -363,7 +407,7 @@ function Canvas(props: CanvasProps) {
         <div className="flex bg-background h-full">
           <ScrollArea>
             <div className="w-16 bg-muted p-2 flex flex-col space-y-4 border-r h-full">
-              <TooltipWrapper content="Drag">
+              <TooltipWrapper content="Drag (H)">
                 <Button
                   onClick={() => setTool("drag")}
                   variant={tool === "drag" ? "default" : "ghost"}
@@ -373,7 +417,7 @@ function Canvas(props: CanvasProps) {
                   <HandIcon className="h-4 w-4" />
                 </Button>
               </TooltipWrapper>
-              <TooltipWrapper content="Pencil">
+              <TooltipWrapper content="Pencil (P)">
                 <Button
                   onClick={() => setTool("pencil")}
                   variant={tool === "pencil" ? "default" : "ghost"}
@@ -383,7 +427,7 @@ function Canvas(props: CanvasProps) {
                   <Pencil1Icon className="h-4 w-4" />
                 </Button>
               </TooltipWrapper>
-              <TooltipWrapper content="Eraser">
+              <TooltipWrapper content="Eraser (E)">
                 <Button
                   onClick={() => setTool("eraser")}
                   variant={tool === "eraser" ? "default" : "ghost"}
@@ -435,7 +479,7 @@ function Canvas(props: CanvasProps) {
                 </PopoverContent>
               </Popover>
               <Separator className="my-2" />
-              <TooltipWrapper content="Undo">
+              <TooltipWrapper content="Undo (Ctrl + Z)">
                 <Button
                   onClick={handleUndo}
                   disabled={historyStep <= 0}
@@ -446,7 +490,7 @@ function Canvas(props: CanvasProps) {
                   <ArrowLeftIcon className="h-4 w-4" />
                 </Button>
               </TooltipWrapper>
-              <TooltipWrapper content="Redo">
+              <TooltipWrapper content="Redo (Ctrl + Y)">
                 <Button
                   onClick={handleRedo}
                   disabled={historyStep >= history.length - 1}
@@ -457,7 +501,7 @@ function Canvas(props: CanvasProps) {
                   <ArrowRightIcon className="h-4 w-4" />
                 </Button>
               </TooltipWrapper>
-              <TooltipWrapper content="Clear Canvas">
+              <TooltipWrapper content="Clear Canvas (Ctrl + R)">
                 <Button
                   onClick={resetCanvas}
                   size="icon"
@@ -468,7 +512,7 @@ function Canvas(props: CanvasProps) {
                 </Button>
               </TooltipWrapper>
               <Separator className="my-2" />
-              <TooltipWrapper content="Zoom In">
+              <TooltipWrapper content="Zoom In (Ctrl + + or Ctrl + =)">
                 <Button
                   onClick={handleZoomIn}
                   size="icon"
@@ -478,7 +522,7 @@ function Canvas(props: CanvasProps) {
                   <ZoomInIcon className="h-4 w-4" />
                 </Button>
               </TooltipWrapper>
-              <TooltipWrapper content="Zoom Out">
+              <TooltipWrapper content="Zoom Out (Ctrl + -)">
                 <Button
                   onClick={handleZoomOut}
                   size="icon"
