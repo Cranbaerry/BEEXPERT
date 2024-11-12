@@ -140,6 +140,7 @@ export default function Playground() {
   const [resources, setResources] = useState<Resource[]>([]);
   const [newResourcesCount, setNewResourceCount] = useState<number>(0);
   const bottomFixedDivRef = useRef<HTMLDivElement>(null);
+  const width = canvasRef.current?.getDimensions()?.width ?? 0;
   const handleWorkflowChanges = async (
     payload: RealtimePostgresUpdatePayload<Profile>,
   ) => {
@@ -608,6 +609,26 @@ export default function Playground() {
     <>
       <QuestionnaireForm />
       {workflow?.id === 4 && <EvaluationForm />}
+
+      {isEmbeddingModelActive && width < 500 && (
+        <>
+          <AlertDialog defaultOpen={true}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Screen too smol :c</AlertDialogTitle>
+                <AlertDialogDescription>
+                  For the best experience, please use a device with a larger
+                  screen. Optionally, you can rotate your device to landscape
+                  mode for a better view. We apologize for the inconvenience.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogAction>Understood 🫡</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </>
+      )}
 
       <AlertDialog open={!browserSupportsSpeechRecognition}>
         <AlertDialogContent>
