@@ -52,6 +52,9 @@ function Canvas(props: CanvasProps) {
   const [scale, setScale] = useState(1);
   const [history, setHistory] = useState<LineData[][]>([]);
   const [historyStep, setHistoryStep] = useState(-1);
+  const [lastTouchDistance, setLastTouchDistance] = useState<number | null>(
+    null,
+  );
 
   useImperativeHandle(props.canvasRef, () => ({
     handleExport: () => handleExport(),
@@ -226,27 +229,59 @@ function Canvas(props: CanvasProps) {
     startDrawing(adjustedPos);
   };
 
+  // const handleTouchMove = (e: KonvaEventObject<TouchEvent>) => {
+  //   e.evt.stopPropagation();
+  //   e.evt.preventDefault();
+
+  //   const stage = e.target.getStage();
+
+  //   if (!stage || !isDrawing.current) return;
+
+  //   const touch = e.evt.touches[0];
+  //   const boundingRect = stage.container().getBoundingClientRect();
+
+  //   const adjustedPos = {
+  //     x: (touch.clientX - boundingRect.left) / scale,
+  //     y: (touch.clientY - boundingRect.top) / scale,
+  //   };
+
+  //   draw(adjustedPos);
+  // };
+
   const handleTouchMove = (e: KonvaEventObject<TouchEvent>) => {
-    e.evt.stopPropagation();
     e.evt.preventDefault();
+    e.evt.stopPropagation();
 
     const stage = e.target.getStage();
+    if (!stage) return;
 
-    if (!stage || !isDrawing.current) return;
+    if (e.evt.touches.length === 2) {
+      const touch1 = e.evt.touches[0];
+      const touch2 = e.evt.touches[1];
+      const currentDistance = getTouchDistance(touch1, touch2);
 
-    const touch = e.evt.touches[0];
-    const boundingRect = stage.container().getBoundingClientRect();
-
-    const adjustedPos = {
-      x: (touch.clientX - boundingRect.left) / scale,
-      y: (touch.clientY - boundingRect.top) / scale,
-    };
-
-    draw(adjustedPos);
+      if (lastTouchDistance != null) {
+        const distanceDiff = currentDistance - lastTouchDistance;
+        const zoomFactor = 1 + distanceDiff * 0.005;
+        setScale((prevScale) =>
+          Math.min(Math.max(prevScale * zoomFactor, 0.5), 3),
+        );
+      }
+      setLastTouchDistance(currentDistance);
+    } else {
+      const touch = e.evt.touches[0];
+      const boundingRect = stage.container().getBoundingClientRect();
+      const adjustedPos = {
+        x: (touch.clientX - boundingRect.left) / scale,
+        y: (touch.clientY - boundingRect.top) / scale,
+      };
+      draw(adjustedPos);
+    }
   };
 
   const handleTouchEnd = () => {
     stopDrawing();
+    setLastTouchDistance(null);
   };
 
   const handleTouchStartFromParent = (e: TouchEvent) => {
@@ -292,6 +327,13 @@ function Canvas(props: CanvasProps) {
 
     if (!stageRef.current) return;
     handleTouchEnd();
+  };
+
+  const getTouchDistance = (touch1: Touch, touch2: Touch) => {
+    return Math.sqrt(
+      Math.pow(touch2.clientX - touch1.clientX, 2) +
+        Math.pow(touch2.clientY - touch1.clientY, 2),
+    );
   };
 
   // useEffect(() => {
