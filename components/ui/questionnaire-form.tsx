@@ -16,6 +16,7 @@ import { Form } from "@/components/ui/form";
 import { toast } from "sonner";
 import { Icons } from "@/components/ui/icons";
 import { isQuestionnaireFinished, insertQuestionnaireData } from "@/lib/utils";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import PersetujuanSection, {
   agreements,
 } from "./questionnaire-section-agreement";
@@ -189,44 +190,46 @@ export default function QuestionnaireForm() {
 
   return (
     <AlertDialog open={isOpen} onOpenChange={handleOpenChange}>
-      {/* <AlertDialogTrigger asChild>
-                <Button>Open Questionnaire</Button>
-            </AlertDialogTrigger> */}
       <AlertDialogContent className={sections[activeSection].class}>
         <FormProvider {...form}>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(handleNext, handleNextError)}>
-              <AlertDialogHeader>{renderSection()}</AlertDialogHeader>
-              <AlertDialogFooter className="flex-col items-center sm:flex-row sm:justify-between">
-                <div className="flex w-full justify-between items-center">
-                  <Button
-                    onClick={handlePrevious}
-                    type="button"
-                    disabled={activeSection === 0 || isLoading}
-                    variant="outline"
-                    size="sm"
-                  >
-                    <ChevronLeftIcon className="mr-2 h-4 w-4" />
-                    Previous
-                  </Button>
-                  <div className="flex space-x-2">
-                    {sections.map((_, index) => (
-                      <div
-                        key={index}
-                        className={`h-2 w-2 rounded-full ${index === activeSection ? "bg-primary" : "bg-gray-300"}`}
-                      />
-                    ))}
+              <ScrollArea className="max-h-[80vh] flex flex-col">
+                <AlertDialogHeader></AlertDialogHeader>
+                <div className="flex-grow overflow-auto">{renderSection()}</div>
+                <AlertDialogFooter className="flex-col items-center sm:flex-row sm:justify-between">
+                  <div className="flex w-full justify-between items-center">
+                    <Button
+                      onClick={handlePrevious}
+                      type="button"
+                      disabled={activeSection === 0 || isLoading}
+                      variant="outline"
+                      size="sm"
+                    >
+                      <ChevronLeftIcon className="mr-2 h-4 w-4" />
+                      Previous
+                    </Button>
+                    <div className="flex space-x-2">
+                      {sections.map((_, index) => (
+                        <div
+                          key={index}
+                          className={`h-2 w-2 rounded-full ${index === activeSection ? "bg-primary" : "bg-gray-300"}`}
+                        />
+                      ))}
+                    </div>
+                    <Button type="submit" size="sm" disabled={isLoading}>
+                      {activeSection === sections.length - 1
+                        ? "Finish"
+                        : "Next"}
+                      {isLoading ? (
+                        <Icons.spinner className="ml-2 h-4 w-4 animate-spin" />
+                      ) : (
+                        <ChevronRightIcon className="h-4 w-4" />
+                      )}
+                    </Button>
                   </div>
-                  <Button type="submit" size="sm" disabled={isLoading}>
-                    {activeSection === sections.length - 1 ? "Finish" : "Next"}
-                    {isLoading ? (
-                      <Icons.spinner className="ml-2 h-4 w-4 animate-spin" />
-                    ) : (
-                      <ChevronRightIcon className="h-4 w-4" />
-                    )}
-                  </Button>
-                </div>
-              </AlertDialogFooter>
+                </AlertDialogFooter>
+              </ScrollArea>
             </form>
           </Form>
         </FormProvider>
