@@ -19,7 +19,10 @@ export async function POST(req: Request) {
       .replace(/·/gi, "dikali");
 
   if (language === "en-US")
-    processedText = text.replace(/·/gi, "times").replace(/-/gi, "minus");
+    processedText = text
+      .replace(/·/gi, "times")
+      .replace(/\*/gi, "times")
+      .replace(/-/gi, "minus");
 
   // VOICE LIST: https://gist.github.com/BettyJJ/17cbaa1de96235a7f5773b8690a20462
   const langDetails = getLanguageDetailsById(language);

@@ -32,7 +32,7 @@ const TTS = forwardRef((props: TTSProps, ref) => {
     height = 200,
     onPlayingStatusChange,
     onReadingTextChange,
-    onFinishedTalking
+    onFinishedTalking,
   } = props;
   const [loading, setLoading] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -296,6 +296,54 @@ const TTS = forwardRef((props: TTSProps, ref) => {
       analyserRef.current = analyserNode;
 
       requestAnimationFrame(drawWaveform);
+    },
+    startExternalAudioVisualizationRandom: () => {
+      const drawRandomWaveform = () => {
+        // Generate base data array only once
+        const randomDataArray = new Uint8Array(2048);
+        for (let i = 0; i < randomDataArray.length; i++) {
+          randomDataArray[i] = Math.floor(Math.random() * 256);
+        }
+
+        let phase = 0; // Track the phase of the wave
+
+        const drawFrame = () => {
+          const canvas = canvasRef.current;
+          if (!canvas) return;
+          const ctx = canvas.getContext("2d");
+          if (!ctx) return;
+
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+          const barWidth = canvas.width / 4.5;
+          const spacing = (canvas.width - barWidth * 4) / 3;
+          const radii = barWidth / 2;
+
+          for (let i = 0; i < 4; i++) {
+            const index = Math.floor(
+              Math.pow(i / 4, 2) * (randomDataArray.length - 1),
+            );
+
+            // Create a smooth wave using a sine function
+            const waveValue = (Math.sin(phase + (i * Math.PI) / 2) + 1) / 2; // range [0, 1]
+            const value = (randomDataArray[index] / 255) * waveValue;
+            const barHeight = 4 + value * (canvas.height * 0.7 - 4);
+            const x = spacing * i + barWidth * i + radii;
+
+            drawBar(ctx, x, barHeight, radii);
+          }
+
+          // Increment the phase to simulate a smooth wave-like motion
+          phase += 0.02;
+
+          // Smooth out with requestAnimationFrame without additional delay
+          requestAnimationFrame(drawFrame);
+        };
+
+        drawFrame();
+      };
+
+      drawRandomWaveform();
     },
   }));
 

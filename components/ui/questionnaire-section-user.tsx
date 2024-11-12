@@ -38,18 +38,18 @@ export default function DataDiriSection() {
 
   return (
     <>
-      <AlertDialogTitle className="mb-2">Personal Information</AlertDialogTitle>
-      <ScrollArea className="!mb-2 h-[calc(100vh-10rem)] sm:h-96 px-1">
-        <p className="mb-2">
-          Kindly fill in your personal details completely and correctly.
-        </p>
+      <AlertDialogTitle>Personal Information</AlertDialogTitle>
+      <ScrollArea className="pb-4">
+        <div className="space-y-4 max-h-[80vh]">
+          <p className="mb-2">
+            Kindly fill in your personal details completely and correctly.
+          </p>
 
-        {/* Full Name */}
-        <FormField
-          control={form.control}
-          name="fullName"
-          render={({ field }) => {
-            return (
+          {/* Full Name */}
+          <FormField
+            control={form.control}
+            name="fullName"
+            render={({ field }) => (
               <FormItem className="mb-2">
                 <FormLabel>Full name</FormLabel>
                 <FormControl>
@@ -64,33 +64,14 @@ export default function DataDiriSection() {
                 </FormControl>
                 <FormMessage />
               </FormItem>
-            );
-          }}
-        />
+            )}
+          />
 
-        {/* WhatsApp Number */}
-        {/* <FormField
-          control={form.control}
-          name="whatsappNumber"
-          render={({ field }) => {
-            return (
-              <FormItem className="mb-2">
-                <FormLabel>Whatsapp number (optional)</FormLabel>
-                <FormControl>
-                  <Input placeholder="081234567890" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            );
-          }}
-        /> */}
-
-        {/* Gender */}
-        <FormField
-          control={form.control}
-          name="gender"
-          render={({ field }) => {
-            return (
+          {/* Gender */}
+          <FormField
+            control={form.control}
+            name="gender"
+            render={({ field }) => (
               <FormItem className="mb-2 space-y-3">
                 <FormLabel>Gender</FormLabel>
                 <FormControl>
@@ -117,16 +98,14 @@ export default function DataDiriSection() {
                 </FormControl>
                 <FormMessage />
               </FormItem>
-            );
-          }}
-        />
+            )}
+          />
 
-        {/* Profession */}
-        <FormField
-          control={form.control}
-          name="profession"
-          render={({ field }) => {
-            return (
+          {/* Profession */}
+          <FormField
+            control={form.control}
+            name="profession"
+            render={({ field }) => (
               <FormItem className="mb-2">
                 <FormLabel>Profession</FormLabel>
                 <Select
@@ -147,62 +126,14 @@ export default function DataDiriSection() {
                 </Select>
                 <FormMessage />
               </FormItem>
-            );
-          }}
-        />
+            )}
+          />
 
-        {/* Education Level */}
-        {/* <FormField
-          control={form.control}
-          name="educationLevel"
-          render={({ field }) => {
-            return (
-              <FormItem className="mb-2">
-                <FormLabel>Educational level</FormLabel>
-                <Select
-                  onValueChange={(value) => {
-                    field.onChange(value);
-                  }}
-                  defaultValue={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select one educational level" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="elementary_school">
-                      Elementary school
-                    </SelectItem>
-                    <SelectItem value="junior_high_school">
-                      Junior high school
-                    </SelectItem>
-                    <SelectItem value="high_school">
-                      High school
-                    </SelectItem>
-                    <SelectItem value="bachelor">
-                      Bachelor degree
-                    </SelectItem>
-                    <SelectItem value="master">
-                      Master degree
-                    </SelectItem>
-                    <SelectItem value="doctoral">
-                      Doctoral degree
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            );
-          }}
-        /> */}
-
-        {/* School */}
-        <FormField
-          control={form.control}
-          name="school"
-          render={({ field }) => {
-            return (
+          {/* School */}
+          <FormField
+            control={form.control}
+            name="school"
+            render={({ field }) => (
               <FormItem className="mb-2">
                 <FormLabel>School/institution</FormLabel>
                 <FormControl>
@@ -216,9 +147,9 @@ export default function DataDiriSection() {
                 </FormControl>
                 <FormMessage />
               </FormItem>
-            );
-          }}
-        />
+            )}
+          />
+        </div>
       </ScrollArea>
     </>
   );

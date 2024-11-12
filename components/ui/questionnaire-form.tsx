@@ -76,8 +76,8 @@ export const formSchema = z.object({
 });
 
 const sections = [
-  { component: PersetujuanSection, class: "sm:max-w-[500px]" },
-  { component: DataDiriSection, class: "sm:max-w-[500px]" },
+  { component: PersetujuanSection, class: "m:max-w-[425px]" },
+  { component: DataDiriSection, class: "m:max-w-[425px]" },
   // { component: PertanyaanUmumSection, class: "sm:max-w-[500px]" },
 ];
 

@@ -113,6 +113,7 @@ export default function Playground() {
     getTTSQueueCount: () => number;
     clearTTSQueue: () => void;
     startExternalAudioVisualization: (stream: MediaStream) => void;
+    startExternalAudioVisualizationRandom: () => void;
   }>();
 
   const [questionSheetImageSource, setQuestionSheetImageSource] =
@@ -132,7 +133,6 @@ export default function Playground() {
 
   // const [setIsSheetLoaded] = useState<boolean>(false);
   const [isMuted, setIsMuted] = useState<boolean>(false);
-  const [stream, setStream] = useState<MediaStream | null>(null);
   const [isMessagesLoaded, setIsMessagesLoaded] = useState<boolean>(false);
   const supabase = createClient();
   const [workflow, setWorkflow] = useState<Workflow | null>(null);
@@ -407,11 +407,16 @@ export default function Playground() {
       setStatus("Listening");
       console.log("Clearing TTS queue");
       if (ttsRef.current) ttsRef.current.clearTTSQueue();
-      navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
-        if (ttsRef.current) {
-          ttsRef.current.startExternalAudioVisualization(stream);
-        }
-      });
+      if (!/Mobi|Android/i.test(navigator.userAgent)) {
+        navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
+          if (ttsRef.current) {
+            ttsRef.current.startExternalAudioVisualization(stream);
+          }
+        });
+      } else {
+        if (ttsRef.current)
+          ttsRef.current.startExternalAudioVisualizationRandom();
+      }
     } else {
       setStatus("Speak to interrupt");
     }
@@ -477,52 +482,25 @@ export default function Playground() {
         language: language,
       });
     } else {
-      // if (listening) {
-      //   SpeechRecognition.stopListening();
-      // }
       SpeechRecognition.abortListening();
     }
   }, [isTabActive, isMuted, language, listening, workflow]);
 
   const toggleMicrophone = useCallback(() => {
     if (isMuted) {
-      navigator.mediaDevices
-        .getUserMedia({ audio: true })
-        .then((mediaStream) => {
-          setStream(mediaStream);
-          setIsMuted(false);
-          SpeechRecognition.startListening({
-            continuous: true,
-            interimResults: true,
-            language: language,
-          });
-          toast.info("Microphone is now unmuted.");
-        })
-        .catch((error) => {
-          console.error("Error accessing microphone:", error);
-          toast.error(
-            "Failed to access microphone. Please check your permissions.",
-          );
-        });
+      SpeechRecognition.startListening({
+        continuous: true,
+        interimResults: true,
+        language: language,
+      });
+      setIsMuted(false);
+      toast.info("Microphone is now unmuted.");
     } else {
-      if (stream) {
-        stream.getTracks().forEach((track) => track.stop());
-        setStream(null);
-      }
-      // SpeechRecognition.stopListening();
       SpeechRecognition.abortListening();
       setIsMuted(true);
       toast.info("Microphone is now muted.");
     }
-  }, [isMuted, stream, language]);
-
-  useEffect(() => {
-    return () => {
-      if (stream) {
-        stream.getTracks().forEach((track) => track.stop());
-      }
-    };
-  }, [stream]);
+  }, [isMuted, language]);
 
   useEffect(() => {
     if (!data) return;
@@ -598,34 +576,32 @@ export default function Playground() {
   }, [data, resources, setData]);
 
   useEffect(() => {
-    // Prevents scrolling while drawing
-    const handleTouchStart = (event: TouchEvent): void =>
-      canvasRef.current?.handleTouchStartFromParent(event);
-    const handleTouchMove = (event: TouchEvent): void =>
-      canvasRef.current?.handleTouchMoveFromParent(event);
-    const handleTouchEnd = (event: TouchEvent): void =>
-      canvasRef.current?.handleTouchEndFromParent(event);
-
-    const targetDiv = bottomFixedDivRef.current;
-    if (targetDiv) {
-      targetDiv.addEventListener("touchstart", handleTouchStart, {
-        passive: false,
-      });
-      targetDiv.addEventListener("touchmove", handleTouchMove, {
-        passive: false,
-      });
-      targetDiv.addEventListener("touchend", handleTouchEnd, {
-        passive: false,
-      });
-    }
-
-    return () => {
-      if (targetDiv) {
-        targetDiv.removeEventListener("touchmove", handleTouchMove);
-        targetDiv.removeEventListener("touchstart", handleTouchStart);
-        targetDiv.removeEventListener("touchend", handleTouchEnd);
-      }
-    };
+    // // Prevents scrolling while drawing
+    // const handleTouchStart = (event: TouchEvent): void =>
+    //   canvasRef.current?.handleTouchStartFromParent(event);
+    // const handleTouchMove = (event: TouchEvent): void =>
+    //   canvasRef.current?.handleTouchMoveFromParent(event);
+    // const handleTouchEnd = (event: TouchEvent): void =>
+    //   canvasRef.current?.handleTouchEndFromParent(event);
+    // const targetDiv = bottomFixedDivRef.current;
+    // if (targetDiv) {
+    //   targetDiv.addEventListener("touchstart", handleTouchStart, {
+    //     passive: false,
+    //   });
+    //   targetDiv.addEventListener("touchmove", handleTouchMove, {
+    //     passive: false,
+    //   });
+    //   targetDiv.addEventListener("touchend", handleTouchEnd, {
+    //     passive: false,
+    //   });
+    // }
+    // return () => {
+    //   if (targetDiv) {
+    //     targetDiv.removeEventListener("touchmove", handleTouchMove);
+    //     targetDiv.removeEventListener("touchstart", handleTouchStart);
+    //     targetDiv.removeEventListener("touchend", handleTouchEnd);
+    //   }
+    // };
   }, []);
 
   return (
@@ -703,6 +679,7 @@ export default function Playground() {
         <div className="flex-auto w-full self-center">
           <div className="text-helper">
             <span className="status whitespace-normal break-all w-full">
+              {/* {finalTranscript} */}
               {activeStream === "user" ? transcript : currentlyPlayingTTSText}
             </span>
           </div>
