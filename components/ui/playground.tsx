@@ -53,6 +53,8 @@ const Canvas = dynamic(() => import("@/components/ui/canvas"), {
   ssr: false,
 });
 
+import EvaluationForm from "./evaluation-form";
+
 export default function Playground() {
   //const [setToolCall] = useState<string>();
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -585,39 +587,39 @@ export default function Playground() {
     }
   }, [data, resources, setData]);
 
-  useEffect(() => {
-    // // Prevents scrolling while drawing
-    // const handleTouchStart = (event: TouchEvent): void =>
-    //   canvasRef.current?.handleTouchStartFromParent(event);
-    // const handleTouchMove = (event: TouchEvent): void =>
-    //   canvasRef.current?.handleTouchMoveFromParent(event);
-    // const handleTouchEnd = (event: TouchEvent): void =>
-    //   canvasRef.current?.handleTouchEndFromParent(event);
-    // const targetDiv = bottomFixedDivRef.current;
-    // if (targetDiv) {
-    //   targetDiv.addEventListener("touchstart", handleTouchStart, {
-    //     passive: false,
-    //   });
-    //   targetDiv.addEventListener("touchmove", handleTouchMove, {
-    //     passive: false,
-    //   });
-    //   targetDiv.addEventListener("touchend", handleTouchEnd, {
-    //     passive: false,
-    //   });
-    // }
-    // return () => {
-    //   if (targetDiv) {
-    //     targetDiv.removeEventListener("touchmove", handleTouchMove);
-    //     targetDiv.removeEventListener("touchstart", handleTouchStart);
-    //     targetDiv.removeEventListener("touchend", handleTouchEnd);
-    //   }
-    // };
-  }, []);
+  // useEffect(() => {
+  //   // // Prevents scrolling while drawing
+  //   // const handleTouchStart = (event: TouchEvent): void =>
+  //   //   canvasRef.current?.handleTouchStartFromParent(event);
+  //   // const handleTouchMove = (event: TouchEvent): void =>
+  //   //   canvasRef.current?.handleTouchMoveFromParent(event);
+  //   // const handleTouchEnd = (event: TouchEvent): void =>
+  //   //   canvasRef.current?.handleTouchEndFromParent(event);
+  //   // const targetDiv = bottomFixedDivRef.current;
+  //   // if (targetDiv) {
+  //   //   targetDiv.addEventListener("touchstart", handleTouchStart, {
+  //   //     passive: false,
+  //   //   });
+  //   //   targetDiv.addEventListener("touchmove", handleTouchMove, {
+  //   //     passive: false,
+  //   //   });
+  //   //   targetDiv.addEventListener("touchend", handleTouchEnd, {
+  //   //     passive: false,
+  //   //   });
+  //   // }
+  //   // return () => {
+  //   //   if (targetDiv) {
+  //   //     targetDiv.removeEventListener("touchmove", handleTouchMove);
+  //   //     targetDiv.removeEventListener("touchstart", handleTouchStart);
+  //   //     targetDiv.removeEventListener("touchend", handleTouchEnd);
+  //   //   }
+  //   // };
+  // }, []);
 
   return (
     <>
       <QuestionnaireForm />
-      {/* {workflow?.id === 4 && <EvaluationForm />} */}
+      {workflow?.id === 2 && <EvaluationForm />}
 
       {isEmbeddingModelActive && (width < 500 || height < 500) && (
         <>
