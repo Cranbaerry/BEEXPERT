@@ -20,8 +20,8 @@ const supabaseClient = createClient(
 
 export const vectorStore = new SupabaseVectorStore(embeddings, {
   client: supabaseClient,
-  tableName: "documents_bge_openweb",
-  queryName: "match_documents_bge_openweb",
+  tableName: "documents_bge_openweb_split",
+  queryName: "match_documents_bge_openweb_split",
 });
 
 export const findRelevantContent = async (userQuery: string) => {
