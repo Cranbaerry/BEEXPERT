@@ -324,39 +324,39 @@ export default function Playground() {
         return;
       }
 
-      const { data: dbMessages, error } = await supabase
-        .from("chat")
-        .select("*")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: true });
+      // const { data: dbMessages, error } = await supabase
+      //   .from("chat")
+      //   .select("*")
+      //   .eq("user_id", user.id)
+      //   .order("created_at", { ascending: true });
 
-      if (error) {
-        console.error("Error fetching messages:", error);
-        return;
-      }
+      // if (error) {
+      //   console.error("Error fetching messages:", error);
+      //   return;
+      // }
 
-      interface DbMessage {
-        id: string;
-        role: "function" | "user" | "data" | "system" | "assistant" | "tool";
-        content: string;
-        created_at: Date;
-        types: string[];
-      }
+      // interface DbMessage {
+      //   id: string;
+      //   role: "function" | "user" | "data" | "system" | "assistant" | "tool";
+      //   content: string;
+      //   created_at: Date;
+      //   types: string[];
+      // }
 
-      const messages: Message[] = dbMessages
-        .filter(
-          (dbMessage: DbMessage) =>
-            Array.isArray(dbMessage.types) && dbMessage.types.includes("text"),
-        )
-        .map((dbMessage: DbMessage) => {
-          return {
-            id: dbMessage.id,
-            role: dbMessage.role,
-            content: dbMessage.content,
-            createdAt: dbMessage.created_at,
-          };
-        });
-      setMessages(messages);
+      // const messages: Message[] = dbMessages
+      //   .filter(
+      //     (dbMessage: DbMessage) =>
+      //       Array.isArray(dbMessage.types) && dbMessage.types.includes("text"),
+      //   )
+      //   .map((dbMessage: DbMessage) => {
+      //     return {
+      //       id: dbMessage.id,
+      //       role: dbMessage.role,
+      //       content: dbMessage.content,
+      //       createdAt: dbMessage.created_at,
+      //     };
+      //   });
+      // setMessages(messages);
       setIsMessagesLoaded(true);
     };
 
@@ -531,7 +531,7 @@ export default function Playground() {
       id: item?.id ?? "",
       title: item?.metadata?.title ?? undefined,
       description: item?.pageContent ?? undefined,
-      link: item?.metadata?.url ?? "#",
+      link: item?.metadata?.source ?? "#",
     }));
 
     if (newResources.length === 0) return;

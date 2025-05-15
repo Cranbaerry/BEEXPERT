@@ -147,9 +147,8 @@ export async function POST(req: Request) {
       Always provide mathematical formulas in plain text using infix notation; do not use LaTeX or other special formatting for equations.
       Offer words of motivation such as "You are on the right track!" and "Great effort, keep going!" Encourage persistence with phrases like "Your hard work is paying off!" or "You’re almost there, keep it up!" Provide appreciation such as "Thank you for trying, your determination is impressive" or "Your solution is correct because you never gave up!"
 
-      ${
-        data.languageId === "id-ID"
-          ? `
+      ${data.languageId === "id-ID"
+      ? `
         IMPORTANT: FOLLOW THESE GUIDELINES TO ENSURE YOUR RESPONSES ARE EASY TO BE READ BY THE TEXT-TO-SPEECH (TTS) ENGINE:
         Use words instead of symbols. For example:
 
@@ -163,8 +162,8 @@ export async function POST(req: Request) {
         For fractions, use phrases like "over." For example, "1/2" should be "one over two." For integrals, use "the integral of" followed by the expression. 
         Avoid any complex formatting that cannot be spoken directly. 
       `
-          : ""
-      }
+      : ""
+    }
 
       If you see sinα, please add spaces between sin and α. For example, "sin α" instead of "sinα".
 
@@ -249,39 +248,41 @@ export async function POST(req: Request) {
             .describe("The user's query rewritten with context. Be concise."),
         }),
         execute: async ({ rewrittenQuery }) => {
+          console.log('Calling getInformation tool with query:', rewrittenQuery);
           const seenUrls = new Set();
           const results = (await findRelevantContent(rewrittenQuery))
             .map((result) => ({
               ...result[0],
               id: createHash("md5")
-                .update(result[0].metadata.url)
+                .update(result[0].metadata.source)
                 .digest("hex"),
               score: result[1],
             }))
             .filter(
               ({ metadata }) =>
-                metadata?.url &&
-                !seenUrls.has(metadata.url) &&
-                seenUrls.add(metadata.url),
+                metadata?.source &&
+                !seenUrls.has(metadata.source) &&
+                seenUrls.add(metadata.source),
             );
-
+          console.log('Found relevant content:', results);
           additionalStreamData.append({
             relevantContent: results,
           });
+
           return results;
         },
       }),
       // TODO: Remove this tool (testing purpose)
-      // weather: tool({
-      //   description: "Get the weather in a location",
-      //   parameters: z.object({
-      //     location: z.string().describe("The location to get the weather for"),
-      //   }),
-      //   execute: async ({ location }) => ({
-      //     location,
-      //     temperature: 72 + Math.floor(Math.random() * 21) - 10,
-      //   }),
-      // }),
+      weather: tool({
+        description: "Get the weather in a location",
+        parameters: z.object({
+          location: z.string().describe("The location to get the weather for"),
+        }),
+        execute: async ({ location }) => ({
+          location,
+          temperature: 72 + Math.floor(Math.random() * 21) - 10,
+        }),
+      }),
     },
     onFinish({ responseMessages }) {
       additionalStreamData.close();
